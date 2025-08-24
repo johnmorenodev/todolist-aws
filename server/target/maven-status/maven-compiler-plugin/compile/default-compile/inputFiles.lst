@@ -1,0 +1,5 @@
+/Users/johnchristophermoreno/Projects/todolist/server/src/main/java/com/todo/app/AppApplication.java
+/Users/johnchristophermoreno/Projects/todolist/server/src/main/java/com/todo/app/auth/AuthController.java
+/Users/johnchristophermoreno/Projects/todolist/server/src/main/java/com/todo/app/security/CookieUtil.java
+/Users/johnchristophermoreno/Projects/todolist/server/src/main/java/com/todo/app/security/JwtService.java
+/Users/johnchristophermoreno/Projects/todolist/server/src/main/java/com/todo/app/security/SecurityConfig.java
