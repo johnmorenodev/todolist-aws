@@ -1,4 +1,4 @@
-package com.todo.app.users.model;
+package com.todo.app.user.model;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

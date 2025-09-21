@@ -1,9 +1,11 @@
-package com.todo.app.users;
+package com.todo.app.user;
+
+import java.util.Optional;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.todo.app.users.model.UserCreateRequest;
+import com.todo.app.user.model.UserCreateRequest;
 
 import lombok.RequiredArgsConstructor;
 
@@ -24,10 +26,9 @@ public class UserService {
 		return userRepository.save(entity);
 	}
 
-	public User authenticate(String usernameOrEmail, String rawPassword) {
+	public Optional<User> authenticate(String usernameOrEmail, String rawPassword) {
 		return userRepository.findByUsernameOrEmail(usernameOrEmail, usernameOrEmail)
-			.filter(u -> passwordEncoder.matches(rawPassword, u.getPassword()))
-			.orElse(null);
+			.filter(u -> passwordEncoder.matches(rawPassword, u.getPassword()));
 	}
 
 	public boolean existsByUsernameOrEmail(String username, String email) {

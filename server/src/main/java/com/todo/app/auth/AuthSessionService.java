@@ -4,7 +4,8 @@ import com.todo.app.refreshTokenStore.RefreshTokenStore;
 import com.todo.app.refreshTokenStore.RefreshTokenStoreService;
 import com.todo.app.security.CookieService;
 import com.todo.app.security.JwtService;
-import com.todo.app.users.User;
+import com.todo.app.user.User;
+
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;

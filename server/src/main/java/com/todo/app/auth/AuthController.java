@@ -8,9 +8,10 @@ import com.todo.app.refreshTokenStore.RefreshTokenStoreService;
 import com.todo.app.security.CookieReader;
 import com.todo.app.security.CookieNames;
 import com.todo.app.security.JwtService;
-import com.todo.app.users.User;
-import com.todo.app.users.UserService;
-import com.todo.app.users.model.UserCreateRequest;
+import com.todo.app.user.User;
+import com.todo.app.user.UserService;
+import com.todo.app.user.model.UserCreateRequest;
+
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -55,11 +57,11 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request, HttpServletResponse response) {
 
-        User user = userService.authenticate(request.username(), request.password());
-        if (user == null) {
+        Optional<User> user = userService.authenticate(request.username(), request.password());
+        if (user.isEmpty()) {
             return ResponseEntity.status(401).body(new ErrorResponse("Invalid credentials"));
         }
-        authSessionService.issueSession(user, response);
+        authSessionService.issueSession(user.get(), response);
         return ResponseEntity.ok(new AuthOkResponse(true));
     }
 

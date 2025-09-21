@@ -1,4 +1,4 @@
-package com.todo.app.users;
+package com.todo.app.user;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

@@ -1,4 +1,4 @@
-package com.todo.app.users;
+package com.todo.app.user;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
