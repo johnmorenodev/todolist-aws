@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { isAxiosError } from 'axios'
-import { signup } from '@/lib/api'
+import { signup } from '@/api/auth'
 
 const email = ref('')
 const username = ref('')

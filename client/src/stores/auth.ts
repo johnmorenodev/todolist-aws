@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { api } from '@/lib/api'
+import { authMe, authRefresh, authLogin, authLogout } from '@/api/auth'
 
-type MeResponse = { authenticated: boolean; username?: string }
 
 export const useAuthStore = defineStore('auth', () => {
   const isAuthenticated = ref<boolean>(false)
@@ -11,7 +11,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function bootstrap() {
     try {
-      const { data } = await api.get<MeResponse>('/auth/me')
+      const { data } = await authMe()
       isAuthenticated.value = data.authenticated
       username.value = data.username ?? null
     } catch {
@@ -24,7 +24,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function tryRefresh(): Promise<boolean> {
     try {
-      await api.post('/auth/refresh')
+      await authRefresh()
       return true
     } catch {
       return false
@@ -32,16 +32,12 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   async function login(u: string, p: string) {
-    // Ensure CSRF cookie exists
-    try { await api.get('/auth/csrf') } catch {}
-    await api.post('/auth/login', { username: u, password: p })
+    await authLogin({ username: u, password: p })
     await bootstrap()
   }
 
   async function logout() {
-    // Ensure CSRF token cookie exists before POSTing
-    try { await api.get('/auth/csrf') } catch {}
-    await api.post('/auth/logout')
+    await authLogout()
     isAuthenticated.value = false
     username.value = null
   }

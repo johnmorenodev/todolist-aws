@@ -1,4 +1,4 @@
-package com.todo.app.auth;
+package com.todo.app.refreshTokenStore;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 })
 @Getter
 @Setter
-public class RefreshTokenStoreRow {
+public class RefreshTokenStore {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

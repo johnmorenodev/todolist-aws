@@ -1,10 +1,25 @@
 import axios from 'axios'
+import { authRefresh } from '@/api/auth'
 
 export const api = axios.create({
   baseURL: '/api',
   withCredentials: true,
   xsrfCookieName: 'XSRF-TOKEN',
   xsrfHeaderName: 'X-XSRF-TOKEN',
+})
+
+// Ensure CSRF cookie exists before mutating requests
+async function ensureCsrf() {
+  if (typeof document !== 'undefined' && document.cookie.includes('XSRF-TOKEN=')) return
+  try { await api.get('/auth/csrf') } catch {}
+}
+
+api.interceptors.request.use(async (config) => {
+  const method = (config.method || 'get').toLowerCase()
+  if (['post', 'put', 'patch', 'delete'].includes(method)) {
+    await ensureCsrf()
+  }
+  return config
 })
 
 // Refresh on 401s transparently
@@ -30,10 +45,8 @@ api.interceptors.response.use(
         return api.request(original)
       }
       try {
-        // Ensure CSRF cookie exists before refresh POST
-        try { await api.get('/auth/csrf') } catch {}
         isRefreshing = true
-        await api.post('/auth/refresh')
+        await authRefresh()
         pendingRequests.forEach((fn) => fn())
         pendingRequests = []
         original.__isRetryRequest = true
@@ -49,9 +62,4 @@ api.interceptors.response.use(
   },
 )
 
-export async function signup(payload: { email: string; username: string; password: string; firstName: string; lastName: string }) {
-  try { await api.get('/auth/csrf') } catch {}
-  return api.post('/auth/signup', payload)
-}
-
-
+// endpoint-specific helpers belong in dedicated services (see auth.ts)

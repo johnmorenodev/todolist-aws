@@ -1,4 +1,4 @@
-package com.todo.app.auth;
+package com.todo.app.refreshTokenStore;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
-public class RefreshTokenStore {
+public class RefreshTokenStoreService {
     // Fallback in-memory map username -> current refresh token id (jti)
     private final ConcurrentHashMap<String, String> fallbackUsernameToJti = new ConcurrentHashMap<>();
 
@@ -16,15 +16,15 @@ public class RefreshTokenStore {
     @Value("${app.refresh.fallback-enabled:false}")
     private boolean fallbackEnabled;
 
-    public RefreshTokenStore(RefreshTokenStoreRepository repository) {
+    public RefreshTokenStoreService(RefreshTokenStoreRepository repository) {
         this.repository = repository;
     }
 
     public void save(String username, String jti) {
         // Try DB first; if unavailable (e.g., migrations not applied), fallback to memory
         try {
-            RefreshTokenStoreRow row = repository.findByUsername(username).orElseGet(() -> {
-                RefreshTokenStoreRow r = new RefreshTokenStoreRow();
+            RefreshTokenStore row = repository.findByUsername(username).orElseGet(() -> {
+                RefreshTokenStore r = new RefreshTokenStore();
                 r.setUsername(username);
                 return r;
             });

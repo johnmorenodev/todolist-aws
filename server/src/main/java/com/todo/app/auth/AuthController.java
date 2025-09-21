@@ -3,6 +3,8 @@ package com.todo.app.auth;
 import com.todo.app.auth.model.AuthOkResponse;
 import com.todo.app.auth.model.ErrorResponse;
 import com.todo.app.auth.model.MeResponse;
+import com.todo.app.auth.model.request.LoginRequest;
+import com.todo.app.refreshTokenStore.RefreshTokenStoreService;
 import com.todo.app.security.CookieReader;
 import com.todo.app.security.CookieNames;
 import com.todo.app.security.JwtService;
@@ -26,13 +28,13 @@ import java.util.Map;
 public class AuthController {
 
     private final JwtService jwtService;
-    private final RefreshTokenStore refreshTokenStore;
+    private final RefreshTokenStoreService refreshTokenStoreService;
     private final AuthSessionService authSessionService;
     private final UserService userService;
 
-    public AuthController(JwtService jwtService, RefreshTokenStore refreshTokenStore, UserService userService, AuthSessionService authSessionService) {
+    public AuthController(JwtService jwtService, RefreshTokenStoreService refreshTokenStoreService, UserService userService, AuthSessionService authSessionService) {
         this.jwtService = jwtService;
-        this.refreshTokenStore = refreshTokenStore;
+        this.refreshTokenStoreService = refreshTokenStoreService;
         this.userService = userService;
         this.authSessionService = authSessionService;
     }
@@ -72,8 +74,8 @@ public class AuthController {
             return ResponseEntity.status(401).body(new ErrorResponse("Invalid refresh token"));
         }
         String jti = jwtService.getJti(refreshToken);
-        if (jti == null || !refreshTokenStore.isValid(subject, jti)) {
-            refreshTokenStore.revoke(subject);
+        if (jti == null || !refreshTokenStoreService.isValid(subject, jti)) {
+            refreshTokenStoreService.revoke(subject);
             return ResponseEntity.status(401).body(new ErrorResponse("Refresh token invalid or rotated"));
         }
         authSessionService.rotateRefresh(subject, response);
@@ -89,7 +91,7 @@ public class AuthController {
             String refresh = CookieReader.get(request, CookieNames.REFRESH_COOKIE);
             if (refresh != null) subject = jwtService.validateAndGetSubject(refresh);
         }
-        if (subject != null) refreshTokenStore.revoke(subject);
+        if (subject != null) refreshTokenStoreService.revoke(subject);
         authSessionService.clearSession(response);
         return ResponseEntity.ok(new AuthOkResponse(true));
     }
@@ -107,7 +109,6 @@ public class AuthController {
         return ResponseEntity.noContent().build();
     }
 
-    public record LoginRequest(@NotBlank String username, @NotBlank String password) {}
 }
 
 
