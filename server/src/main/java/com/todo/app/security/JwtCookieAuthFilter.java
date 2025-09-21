@@ -23,7 +23,7 @@ public class JwtCookieAuthFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String token = CookieUtil.getCookie(request, CookieUtil.ACCESS_COOKIE);
+        String token = CookieReader.get(request, CookieNames.ACCESS_COOKIE);
         if (token != null) {
             String subject = jwtService.validateAndGetSubject(token);
             if (subject != null && SecurityContextHolder.getContext().getAuthentication() == null) {

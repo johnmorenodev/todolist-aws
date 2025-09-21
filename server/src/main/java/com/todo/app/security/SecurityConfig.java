@@ -47,7 +47,6 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtCookieAuthFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(rateLimitingFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterAfter(csrfCookieFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -70,12 +69,10 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    private final RateLimitingFilter rateLimitingFilter;
     private final JwtCookieAuthFilter jwtCookieAuthFilter;
     private final CsrfCookieFilter csrfCookieFilter;
 
-    public SecurityConfig(RateLimitingFilter rateLimitingFilter, JwtCookieAuthFilter jwtCookieAuthFilter, CsrfCookieFilter csrfCookieFilter) {
-        this.rateLimitingFilter = rateLimitingFilter;
+    public SecurityConfig(JwtCookieAuthFilter jwtCookieAuthFilter, CsrfCookieFilter csrfCookieFilter) {
         this.jwtCookieAuthFilter = jwtCookieAuthFilter;
         this.csrfCookieFilter = csrfCookieFilter;
     }

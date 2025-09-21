@@ -32,8 +32,8 @@ public class AuthSessionService {
         String jti = UUID.randomUUID().toString();
         String refresh = jwtService.generateRefreshToken(user.getUsername(), Map.of("jti", jti));
         refreshTokenStore.save(user.getUsername(), jti);
-        cookieService.set(response, com.todo.app.security.CookieUtil.ACCESS_COOKIE, access, (int) jwtService.getAccessTtlSeconds());
-        cookieService.set(response, com.todo.app.security.CookieUtil.REFRESH_COOKIE, refresh, (int) jwtService.getRefreshTtlSeconds());
+        cookieService.set(response, com.todo.app.security.CookieNames.ACCESS_COOKIE, access, (int) jwtService.getAccessTtlSeconds());
+        cookieService.set(response, com.todo.app.security.CookieNames.REFRESH_COOKIE, refresh, (int) jwtService.getRefreshTtlSeconds());
     }
 
     public void rotateRefresh(String subject, HttpServletResponse response) {
@@ -42,13 +42,13 @@ public class AuthSessionService {
         String newJti = UUID.randomUUID().toString();
         String newRefresh = jwtService.generateRefreshToken(subject, Map.of("jti", newJti));
         refreshTokenStore.save(subject, newJti);
-        cookieService.set(response, com.todo.app.security.CookieUtil.ACCESS_COOKIE, newAccess, (int) jwtService.getAccessTtlSeconds());
-        cookieService.set(response, com.todo.app.security.CookieUtil.REFRESH_COOKIE, newRefresh, (int) jwtService.getRefreshTtlSeconds());
+        cookieService.set(response, com.todo.app.security.CookieNames.ACCESS_COOKIE, newAccess, (int) jwtService.getAccessTtlSeconds());
+        cookieService.set(response, com.todo.app.security.CookieNames.REFRESH_COOKIE, newRefresh, (int) jwtService.getRefreshTtlSeconds());
     }
 
     public void clearSession(HttpServletResponse response) {
-        cookieService.clear(response, com.todo.app.security.CookieUtil.ACCESS_COOKIE);
-        cookieService.clear(response, com.todo.app.security.CookieUtil.REFRESH_COOKIE);
+        cookieService.clear(response, com.todo.app.security.CookieNames.ACCESS_COOKIE);
+        cookieService.clear(response, com.todo.app.security.CookieNames.REFRESH_COOKIE);
     }
 }
 

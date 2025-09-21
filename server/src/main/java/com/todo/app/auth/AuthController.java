@@ -3,7 +3,8 @@ package com.todo.app.auth;
 import com.todo.app.auth.model.AuthOkResponse;
 import com.todo.app.auth.model.ErrorResponse;
 import com.todo.app.auth.model.MeResponse;
-import com.todo.app.security.CookieUtil;
+import com.todo.app.security.CookieReader;
+import com.todo.app.security.CookieNames;
 import com.todo.app.security.JwtService;
 import com.todo.app.users.User;
 import com.todo.app.users.UserService;
@@ -62,7 +63,7 @@ public class AuthController {
 
     @PostMapping("/refresh")
     public ResponseEntity<?> refresh(HttpServletRequest request, HttpServletResponse response) {
-        String refreshToken = CookieUtil.getCookie(request, CookieUtil.REFRESH_COOKIE);
+        String refreshToken = CookieReader.get(request, CookieNames.REFRESH_COOKIE);
         if (refreshToken == null) {
             return ResponseEntity.status(401).body(Map.of("error", "No refresh token"));
         }
@@ -82,10 +83,10 @@ public class AuthController {
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
         String subject = null;
-        String access = CookieUtil.getCookie(request, CookieUtil.ACCESS_COOKIE);
+        String access = CookieReader.get(request, CookieNames.ACCESS_COOKIE);
         if (access != null) subject = jwtService.validateAndGetSubject(access);
         if (subject == null) {
-            String refresh = CookieUtil.getCookie(request, CookieUtil.REFRESH_COOKIE);
+            String refresh = CookieReader.get(request, CookieNames.REFRESH_COOKIE);
             if (refresh != null) subject = jwtService.validateAndGetSubject(refresh);
         }
         if (subject != null) refreshTokenStore.revoke(subject);
