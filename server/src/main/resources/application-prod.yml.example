@@ -1,0 +1,28 @@
+spring:
+  application:
+    name: todolist
+  datasource:
+    url: jdbc:postgresql://YOUR_PROD_DB_HOST:5432/todolist
+    driver-class-name: org.postgresql.Driver
+    username: YOUR_PROD_DB_USER
+    password: YOUR_PROD_DB_PASSWORD
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+  flyway:
+    enabled: true
+    url: ${spring.datasource.url}
+    user: ${spring.datasource.username}
+    password: ${spring.datasource.password}
+
+jwt:
+  secret: YOUR_LONG_RANDOM_JWT_SECRET
+
+app:
+  cors:
+    allowed-origin: https://your-site.example
+  cookies:
+    secure: true
+
+

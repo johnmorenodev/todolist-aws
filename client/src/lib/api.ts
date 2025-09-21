@@ -3,6 +3,8 @@ import axios from 'axios'
 export const api = axios.create({
   baseURL: '/api',
   withCredentials: true,
+  xsrfCookieName: 'XSRF-TOKEN',
+  xsrfHeaderName: 'X-XSRF-TOKEN',
 })
 
 // Refresh on 401s transparently
@@ -28,6 +30,8 @@ api.interceptors.response.use(
         return api.request(original)
       }
       try {
+        // Ensure CSRF cookie exists before refresh POST
+        try { await api.get('/auth/csrf') } catch {}
         isRefreshing = true
         await api.post('/auth/refresh')
         pendingRequests.forEach((fn) => fn())
@@ -44,5 +48,10 @@ api.interceptors.response.use(
     throw error
   },
 )
+
+export async function signup(payload: { email: string; username: string; password: string; firstName: string; lastName: string }) {
+  try { await api.get('/auth/csrf') } catch {}
+  return api.post('/auth/signup', payload)
+}
 
 

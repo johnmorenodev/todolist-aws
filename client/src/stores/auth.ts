@@ -14,7 +14,7 @@ export const useAuthStore = defineStore('auth', () => {
       const { data } = await api.get<MeResponse>('/auth/me')
       isAuthenticated.value = data.authenticated
       username.value = data.username ?? null
-    } catch (_) {
+    } catch {
       isAuthenticated.value = false
       username.value = null
     } finally {
@@ -26,17 +26,21 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       await api.post('/auth/refresh')
       return true
-    } catch (_) {
+    } catch {
       return false
     }
   }
 
   async function login(u: string, p: string) {
+    // Ensure CSRF cookie exists
+    try { await api.get('/auth/csrf') } catch {}
     await api.post('/auth/login', { username: u, password: p })
     await bootstrap()
   }
 
   async function logout() {
+    // Ensure CSRF token cookie exists before POSTing
+    try { await api.get('/auth/csrf') } catch {}
     await api.post('/auth/logout')
     isAuthenticated.value = false
     username.value = null

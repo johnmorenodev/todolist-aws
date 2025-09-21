@@ -1,7 +1,7 @@
 package com.todo.app.security;
 
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
@@ -41,22 +41,28 @@ public class JwtService {
     }
 
     public String generateAccessToken(String subject, Map<String, Object> claims) {
-        return generateToken(subject, claims, accessTtlSeconds);
+        return generateToken(subject, claims, accessTtlSeconds, null);
     }
 
     public String generateRefreshToken(String subject, Map<String, Object> claims) {
-        return generateToken(subject, claims, refreshTtlSeconds);
+        String jti = null;
+        if (claims != null && claims.containsKey("jti")) {
+            Object v = claims.get("jti");
+            jti = v != null ? v.toString() : null;
+        }
+        return generateToken(subject, claims, refreshTtlSeconds, jti);
     }
 
-    private String generateToken(String subject, Map<String, Object> claims, long ttlSeconds) {
+    private String generateToken(String subject, Map<String, Object> claims, long ttlSeconds, String jti) {
         Instant now = Instant.now();
-        return Jwts.builder()
+        io.jsonwebtoken.JwtBuilder builder = Jwts.builder()
                 .subject(subject)
                 .claims(claims)
                 .issuedAt(Date.from(now))
-                .expiration(Date.from(now.plusSeconds(ttlSeconds)))
-                .signWith(key, SignatureAlgorithm.HS256)
-                .compact();
+                .expiration(Date.from(now.plusSeconds(ttlSeconds)));
+        if (jti != null) builder.id(jti);
+        // Use non-deprecated signing API
+        return builder.signWith(key).compact();
     }
 
     public String validateAndGetSubject(String token) {
@@ -68,6 +74,26 @@ public class JwtService {
             return null;
         }
     }
+
+    public Claims parseClaims(String token) {
+        try {
+            return Jwts.parser().verifyWith(key).build().parseSignedClaims(token).getPayload();
+        } catch (Exception ex) {
+            return null;
+        }
+    }
+
+    public String getJti(String token) {
+        Claims claims = parseClaims(token);
+        if (claims == null) return null;
+        String id = claims.getId();
+        if (id != null) return id;
+        Object alt = claims.get("jti");
+        return alt != null ? alt.toString() : null;
+    }
+
+    public long getAccessTtlSeconds() { return accessTtlSeconds; }
+    public long getRefreshTtlSeconds() { return refreshTtlSeconds; }
 }
 
 

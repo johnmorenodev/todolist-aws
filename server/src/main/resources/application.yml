@@ -1,0 +1,41 @@
+spring:
+  application:
+    name: todolist
+  datasource:
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate  # use Flyway for schema changes
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  jackson:
+    serialization:
+      WRITE_DATES_AS_TIMESTAMPS: false
+
+server:
+  port: 8080
+
+logging:
+  level:
+    root: INFO
+    org.springframework.web: INFO
+    org.hibernate.SQL: WARN
+
+# Custom JWT and CORS settings (safe defaults only; real secrets live in profile ymls)
+jwt:
+  access:
+    ttl-seconds: 900
+  refresh:
+    ttl-seconds: 1209600
+
+app:
+  cors:
+    allowed-origin: http://localhost:5173
+  cookies:
+    # In production, set to true; in local dev, override via application-local.yml
+    secure: true
+
+

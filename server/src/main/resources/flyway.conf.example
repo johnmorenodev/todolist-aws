@@ -1,0 +1,11 @@
+# Copy this file to flyway.conf (same directory) and fill in secrets locally.
+# This file is intentionally committed; the real flyway.conf is .gitignored.
+
+flyway.driver=org.postgresql.Driver
+flyway.url=jdbc:postgresql://localhost:5432/todolist
+flyway.user=app
+flyway.password=secret
+flyway.locations=filesystem:src/main/resources/db/migration
+flyway.cleanDisabled=true
+flyway.baselineOnMigrate=true
+
