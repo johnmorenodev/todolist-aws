@@ -1,0 +1,33 @@
+name: "Build and Deploy Frontend to AWS S3 + CloudFront on Push"
+
+on:
+  push:
+    paths:
+      - 'client/**'
+    branches:
+      - main
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies cache
+        run: npm ci
+        working-directory: client
+
+
+      - name: Build
+        run: npm run build
+        working-directory: client
+        env:
+          VITE_DEV_PROXY_TARGET: ${{ secrets.VITE_DEV_PROXY_TARGET }}
+          VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
