@@ -2,6 +2,7 @@
 
 <template>
   <router-view />
+  <!-- test build and deploy -->
 </template>
 
 <style scoped></style>
