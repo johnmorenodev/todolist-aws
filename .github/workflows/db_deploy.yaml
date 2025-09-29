@@ -1,0 +1,28 @@
+name: "Deploy Database to AWS RDS on Push"
+
+on:
+  push:
+    paths:
+      - 'server/src/main/resources/db/migration/**'
+    branches:
+      - main
+
+jobs:
+  migrate_db:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Flyway migrations
+        run: |
+          docker run --rm \
+            -v ${{ github.workspace }}/server/src/main/resources/db/migration:/flyway/sql \
+            flyway/flyway:10.12 \
+            -url=jdbc:postgresql://${{ secrets.DB_HOST }}:5432/${{ secrets.DB_NAME }} \
+            -user=${{ secrets.DB_USER }} \
+            -password=${{ secrets.DB_PASSWORD }} \
+            -connectRetries=10 \
+            -baselineOnMigrate=true \
+            -cleanDisabled=true \
+            migrate
