@@ -29,7 +29,7 @@ import java.util.Optional;
 @Validated
 public class AuthController {
 
-    private final JwtService jwtService;
+    private final JwtService jwtService; //
     private final RefreshTokenStoreService refreshTokenStoreService;
     private final AuthSessionService authSessionService;
     private final UserService userService;

@@ -29,7 +29,9 @@ jobs:
       - name: Build, Tag, and Push image to ECR
         run: |
           IMAGE_TAG=${{ github.sha }}
-          docker build -t ${{ secrets.ECR_REPO }}:$IMAGE_TAG .
+          docker build \
+          -t ${{ secrets.ECR_REPO }}:$IMAGE_TAG \
+          -f server/Dockerfile server
           docker push ${{ secrets.ECR_REPO }}:$IMAGE_TAG
 
       - name: Export image tag
