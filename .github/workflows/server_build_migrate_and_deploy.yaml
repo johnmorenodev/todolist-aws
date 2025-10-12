@@ -8,6 +8,39 @@ on:
       - main
 
 jobs:
+  migrate:
+    name: Flyway DB Migrate (self-hosted)
+    runs-on: [self-hosted, linux]
+    env:
+      AWS_REGION: ap-southeast-1
+      MIGRATIONS_DIR: server/db/migrations
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials (access keys)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Run Flyway migrations (Docker)
+        env:
+          FLYWAY_URL: ${{ secrets.DB_JDBC_URL }}     # e.g., jdbc:postgresql://rds-host:5432/mydb
+          FLYWAY_USER: ${{ secrets.DB_USER }}
+          FLYWAY_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        run: |
+          docker run --rm \
+            --network=host \
+            -v "$GITHUB_WORKSPACE/${MIGRATIONS_DIR}:/flyway/sql:ro" \
+            -e FLYWAY_URL="$FLYWAY_URL" \
+            -e FLYWAY_USER="$FLYWAY_USER" \
+            -e FLYWAY_PASSWORD="$FLYWAY_PASSWORD" \
+            flyway/flyway:9 \
+            -baselineOnMigrate=true \
+            -connectRetries=10 \
+            migrate
   build:
     name: Build & Push Docker Image
     runs-on: ubuntu-latest
