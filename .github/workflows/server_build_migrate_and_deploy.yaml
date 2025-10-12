@@ -13,7 +13,7 @@ jobs:
     runs-on: [self-hosted, linux]
     env:
       AWS_REGION: ap-southeast-1
-      MIGRATIONS_DIR: server/db/migrations
+      MIGRATIONS_DIR: server/db/migration
     steps:
       - name: Checkout
         uses: actions/checkout@v4
