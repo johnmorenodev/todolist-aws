@@ -34,7 +34,8 @@ public class AuthController {
     private final AuthSessionService authSessionService;
     private final UserService userService;
 
-    public AuthController(JwtService jwtService, RefreshTokenStoreService refreshTokenStoreService, UserService userService, AuthSessionService authSessionService) {
+    public AuthController(JwtService jwtService, RefreshTokenStoreService refreshTokenStoreService,
+            UserService userService, AuthSessionService authSessionService) {
         this.jwtService = jwtService;
         this.refreshTokenStoreService = refreshTokenStoreService;
         this.userService = userService;
@@ -88,12 +89,15 @@ public class AuthController {
     public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
         String subject = null;
         String access = CookieReader.get(request, CookieNames.ACCESS_COOKIE);
-        if (access != null) subject = jwtService.validateAndGetSubject(access);
+        if (access != null)
+            subject = jwtService.validateAndGetSubject(access);
         if (subject == null) {
             String refresh = CookieReader.get(request, CookieNames.REFRESH_COOKIE);
-            if (refresh != null) subject = jwtService.validateAndGetSubject(refresh);
+            if (refresh != null)
+                subject = jwtService.validateAndGetSubject(refresh);
         }
-        if (subject != null) refreshTokenStoreService.revoke(subject);
+        if (subject != null)
+            refreshTokenStoreService.revoke(subject);
         authSessionService.clearSession(response);
         return ResponseEntity.ok(new AuthOkResponse(true));
     }
@@ -110,7 +114,4 @@ public class AuthController {
     public ResponseEntity<?> csrf() {
         return ResponseEntity.noContent().build();
     }
-
 }
-
-
