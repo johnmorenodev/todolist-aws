@@ -3,7 +3,7 @@ name: "Build, Run Migrations, and Deploy Server to AWS ECS on Push"
 on:
   push:
     paths:
-      - 'server/**'
+      - "server/**"
     branches:
       - main
 
@@ -30,7 +30,7 @@ jobs:
 
       - name: Run Flyway migrations (Docker)
         env:
-          FLYWAY_URL: ${{ secrets.DB_JDBC_URL }}     # e.g., jdbc:postgresql://rds-host:5432/mydb
+          FLYWAY_URL: ${{ secrets.DB_JDBC_URL }} # e.g., jdbc:postgresql://rds-host:5432/mydb
           FLYWAY_USER: ${{ secrets.DB_USER }}
           FLYWAY_PASSWORD: ${{ secrets.DB_PASSWORD }}
         run: |
@@ -73,3 +73,25 @@ jobs:
 
       - name: Export image tag
         run: echo "IMAGE_TAG=${GITHUB_SHA}" >> $GITHUB_ENV
+
+  deploy-ec2:
+    name: Deploy to EC2 (Docker Compose)
+    runs-on: ubuntu-latest
+    needs: [migrate, build]
+    env:
+      AWS_REGION: ap-southeast-1
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # We'll SSH into the instance and run the deploy script with the new tag.
+      - name: Deploy over SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.EC2_HOST }} # e.g. ec2-xx-xx-xx-xx.compute-1.amazonaws.com
+          username: ${{ secrets.EC2_USER }} # e.g. ubuntu (Ubuntu AMI) or ec2-user (Amazon Linux)
+          key: ${{ secrets.EC2_SSH_KEY }} # private key that matches the instance's authorized key
+          script: |
+            export GITHUB_SHA=${{ github.sha }}
+            cd ~/app
+            ./deploy.sh "$GITHUB_SHA"
