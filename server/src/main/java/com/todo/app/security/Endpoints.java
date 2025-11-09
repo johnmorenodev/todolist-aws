@@ -12,6 +12,8 @@ public final class Endpoints {
     public static final String SIGNUP = AUTH_BASE + "/signup";
     public static final String CSRF = AUTH_BASE + "/csrf";
     public static final String ME = AUTH_BASE + "/me";
+    
+    public static final String HEALTH = API_BASE + "/health";
 }
 
 

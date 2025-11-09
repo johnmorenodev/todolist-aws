@@ -23,64 +23,68 @@ import java.util.List;
 @Configuration
 public class SecurityConfig {
 
-    @Value("${app.cors.allowed-origin}")
-    private String allowedOrigin;
+        @Value("${app.cors.allowed-origin}")
+        private String allowedOrigin;
 
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        CsrfTokenRepository csrfRepo = CookieCsrfTokenRepository.withHttpOnlyFalse();
-        RequestMatcher logoutMatcher = request -> HttpMethod.POST.matches(request.getMethod())
-                && request.getRequestURI().equals(Endpoints.LOGOUT);
-        RequestMatcher loginMatcher = request -> HttpMethod.POST.matches(request.getMethod())
-                && request.getRequestURI().equals(Endpoints.LOGIN);
-        RequestMatcher refreshMatcher = request -> HttpMethod.POST.matches(request.getMethod())
-                && request.getRequestURI().equals(Endpoints.REFRESH);
-        RequestMatcher healthMatcher = request -> HttpMethod.GET.matches(request.getMethod())
-                && request.getRequestURI().equals("/health");
-        http
-                .csrf(csrf -> csrf
-                        .csrfTokenRepository(csrfRepo)
-                        .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
-                        .ignoringRequestMatchers(logoutMatcher, loginMatcher, refreshMatcher, healthMatcher))
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.POST, Endpoints.LOGIN, Endpoints.REFRESH, Endpoints.LOGOUT,
-                                Endpoints.SIGNUP)
-                        .permitAll()
-                        .requestMatchers(HttpMethod.GET, Endpoints.CSRF, Endpoints.ME).permitAll()
-                        .anyRequest().authenticated())
-                .addFilterBefore(jwtCookieAuthFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterAfter(csrfCookieFilter, UsernamePasswordAuthenticationFilter.class);
+        @Bean
+        public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+                CsrfTokenRepository csrfRepo = CookieCsrfTokenRepository.withHttpOnlyFalse();
+                RequestMatcher logoutMatcher = request -> HttpMethod.POST.matches(request.getMethod())
+                                && request.getRequestURI().equals(Endpoints.LOGOUT);
+                RequestMatcher loginMatcher = request -> HttpMethod.POST.matches(request.getMethod())
+                                && request.getRequestURI().equals(Endpoints.LOGIN);
+                RequestMatcher refreshMatcher = request -> HttpMethod.POST.matches(request.getMethod())
+                                && request.getRequestURI().equals(Endpoints.REFRESH);
+                RequestMatcher healthMatcher = request -> HttpMethod.GET.matches(request.getMethod())
+                                && request.getRequestURI().equals(Endpoints.HEALTH);
+                http
+                                .csrf(csrf -> csrf
+                                                .csrfTokenRepository(csrfRepo)
+                                                .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
+                                                .ignoringRequestMatchers(logoutMatcher, loginMatcher, refreshMatcher,
+                                                                healthMatcher))
+                                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                                .authorizeHttpRequests(auth -> auth
+                                                .requestMatchers(HttpMethod.POST, Endpoints.LOGIN, Endpoints.REFRESH,
+                                                                Endpoints.LOGOUT,
+                                                                Endpoints.SIGNUP)
+                                                .permitAll()
+                                                .requestMatchers(HttpMethod.GET, Endpoints.CSRF, Endpoints.ME,
+                                                                Endpoints.HEALTH)
+                                                .permitAll()
+                                                .anyRequest().authenticated())
+                                .addFilterBefore(jwtCookieAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                                .addFilterAfter(csrfCookieFilter, UsernamePasswordAuthenticationFilter.class);
 
-        return http.build();
-    }
+                return http.build();
+        }
 
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of(allowedOrigin));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(
-                List.of("Content-Type", "Authorization", "X-XSRF-TOKEN", "Accept", "X-Requested-With"));
-        configuration.setAllowCredentials(true);
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
+        @Bean
+        public CorsConfigurationSource corsConfigurationSource() {
+                CorsConfiguration configuration = new CorsConfiguration();
+                configuration.setAllowedOrigins(List.of(allowedOrigin));
+                configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+                configuration.setAllowedHeaders(
+                                List.of("Content-Type", "Authorization", "X-XSRF-TOKEN", "Accept", "X-Requested-With"));
+                configuration.setAllowCredentials(true);
+                UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+                source.registerCorsConfiguration("/**", configuration);
+                return source;
+        }
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+        @Bean
+        public PasswordEncoder passwordEncoder() {
+                return new BCryptPasswordEncoder();
+        }
 
-    private final JwtCookieAuthFilter jwtCookieAuthFilter;
-    private final CsrfCookieFilter csrfCookieFilter;
+        private final JwtCookieAuthFilter jwtCookieAuthFilter;
+        private final CsrfCookieFilter csrfCookieFilter;
 
-    public SecurityConfig(JwtCookieAuthFilter jwtCookieAuthFilter, CsrfCookieFilter csrfCookieFilter) {
-        this.jwtCookieAuthFilter = jwtCookieAuthFilter;
-        this.csrfCookieFilter = csrfCookieFilter;
-    }
+        public SecurityConfig(JwtCookieAuthFilter jwtCookieAuthFilter, CsrfCookieFilter csrfCookieFilter) {
+                this.jwtCookieAuthFilter = jwtCookieAuthFilter;
+                this.csrfCookieFilter = csrfCookieFilter;
+        }
 
-    // Extracted filters are defined as standalone @Component beans
+        // Extracted filters are defined as standalone @Component beans
 }
