@@ -1,5 +1,5 @@
 import { api } from '@/lib/api'
-//
+
 export type MeResponse = { authenticated: boolean; username?: string }
 
 export async function signup(payload: {
@@ -27,3 +27,5 @@ export async function authLogin(payload: { username: string; password: string })
 export async function authLogout() {
   return api.post('/auth/logout')
 }
+
+

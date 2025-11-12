@@ -1,5 +1,12 @@
-import axios from 'axios'
+import axios, { AxiosRequestConfig } from 'axios'
 import { authRefresh } from '@/api/auth'
+
+declare module 'axios' {
+  // augment to mark retry requests
+  export interface AxiosRequestConfig {
+    __isRetryRequest?: boolean
+  }
+}
 
 export const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
@@ -8,10 +15,13 @@ export const api = axios.create({
   xsrfHeaderName: 'X-XSRF-TOKEN',
 })
 
-// Ensure CSRF cookie exists before mutating requests
 async function ensureCsrf() {
   if (typeof document !== 'undefined' && document.cookie.includes('XSRF-TOKEN=')) return
-  try { await api.get('/auth/csrf') } catch {}
+  try {
+    await api.get('/auth/csrf')
+  } catch {
+    // no-op
+  }
 }
 
 api.interceptors.request.use(async (config) => {
@@ -22,19 +32,17 @@ api.interceptors.request.use(async (config) => {
   return config
 })
 
-// Refresh on 401s transparently
 let isRefreshing = false
 let pendingRequests: Array<() => void> = []
 
 api.interceptors.response.use(
   (res) => res,
   async (error) => {
-    const original = error.config
+    const original: AxiosRequestConfig | undefined = error.config
     if (!original || original.__isRetryRequest) {
       throw error
     }
     if (error.response && error.response.status === 401) {
-      // If the 401 came from the refresh endpoint itself, don't try to refresh again
       const url = (original.url || '').toString()
       if (url.includes('/auth/refresh')) {
         throw error
@@ -62,4 +70,4 @@ api.interceptors.response.use(
   },
 )
 
-// endpoint-specific helpers belong in dedicated services (see auth.ts)
+
