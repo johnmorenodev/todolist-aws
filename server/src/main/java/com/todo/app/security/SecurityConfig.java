@@ -33,6 +33,8 @@ public class SecurityConfig {
                                 && request.getRequestURI().equals(Endpoints.LOGOUT);
                 RequestMatcher loginMatcher = request -> HttpMethod.POST.matches(request.getMethod())
                                 && request.getRequestURI().equals(Endpoints.LOGIN);
+                RequestMatcher signupMatcher = request -> HttpMethod.POST.matches(request.getMethod())
+                                && request.getRequestURI().equals(Endpoints.SIGNUP);
                 RequestMatcher refreshMatcher = request -> HttpMethod.POST.matches(request.getMethod())
                                 && request.getRequestURI().equals(Endpoints.REFRESH);
                 RequestMatcher healthMatcher = request -> HttpMethod.GET.matches(request.getMethod())
@@ -41,7 +43,7 @@ public class SecurityConfig {
                                 .csrf(csrf -> csrf
                                                 .csrfTokenRepository(csrfRepo)
                                                 .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
-                                                .ignoringRequestMatchers(logoutMatcher, loginMatcher, refreshMatcher,
+                                                .ignoringRequestMatchers(logoutMatcher, loginMatcher, signupMatcher, refreshMatcher,
                                                                 healthMatcher))
                                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
