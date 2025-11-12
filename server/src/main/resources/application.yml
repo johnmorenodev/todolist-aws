@@ -29,7 +29,7 @@ jwt:
 
 app:
   cors:
-    allowed-origin: http://localhost:5173
+    allowed-origin: http://localhost:5174
   cookies:
     secure: false
   refresh:
