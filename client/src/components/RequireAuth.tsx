@@ -1,47 +1,32 @@
-import { PropsWithChildren, useEffect, useMemo, useRef, useState } from 'react'
+import { PropsWithChildren, useEffect, useMemo } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 import { useAuthStore } from '@/stores/auth'
+import { useAuthMe } from '@/hooks/auth/queries'
 
 export function RequireAuth({ children }: PropsWithChildren) {
   const location = useLocation()
-  const { initializing, isAuthenticated, bootstrap, tryRefresh } = useAuthStore()
-  const [attemptedRefresh, setAttemptedRefresh] = useState(false)
-  const refreshInFlight = useRef(false)
+  const { data: authData, isLoading, isError } = useAuthMe()
+  const { setAuthData, clearAuth } = useAuthStore()
 
   useEffect(() => {
-    if (initializing) {
-      void bootstrap()
+    if (authData) {
+      setAuthData(authData)
+    } else if (isError) {
+      clearAuth()
     }
-  }, [initializing, bootstrap])
-
-  useEffect(() => {
-    const run = async () => {
-      if (!initializing && !isAuthenticated && !attemptedRefresh && !refreshInFlight.current) {
-        refreshInFlight.current = true
-        try {
-          const refreshed = await tryRefresh()
-          if (refreshed) {
-            await bootstrap()
-          }
-        } finally {
-          setAttemptedRefresh(true)
-          refreshInFlight.current = false
-        }
-      }
-    }
-    void run()
-  }, [initializing, isAuthenticated, attemptedRefresh, bootstrap, tryRefresh])
+  }, [authData, isError, setAuthData, clearAuth])
 
   const redirectPath = useMemo(() => {
     const path = location.pathname + location.search
     return path || '/'
   }, [location.pathname, location.search])
 
-  if (initializing) return null
-  if (!isAuthenticated) {
-    if (!attemptedRefresh) return null
+  if (isLoading) return null
+  
+  if (!authData?.authenticated) {
     return <Navigate to={`/login?redirect=${encodeURIComponent(redirectPath)}`} replace />
   }
+  
   return children as JSX.Element
 }
 

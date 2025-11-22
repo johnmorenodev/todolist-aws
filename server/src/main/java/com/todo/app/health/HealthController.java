@@ -1,7 +1,8 @@
 package com.todo.app.health;
 
-import java.util.Map;
-
+import com.todo.app.common.response.ApiResponse;
+import com.todo.app.health.model.HealthData;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -11,8 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class HealthController {
 
     @GetMapping
-    public Object checkHealth() {
-        Map<String, String> health = Map.of("status", "running");
-        return health;
+    public ResponseEntity<ApiResponse<HealthData>> checkHealth() {
+        HealthData health = new HealthData("running");
+        return ResponseEntity.ok(ApiResponse.ok(health));
     }
 }

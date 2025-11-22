@@ -1,6 +1,6 @@
 import { api } from '@/lib/api'
 
-export type MeResponse = { authenticated: boolean; username?: string }
+export type MeData = { authenticated: boolean; username: string | null }
 
 export async function signup(payload: {
   email: string
@@ -9,23 +9,23 @@ export async function signup(payload: {
   firstName: string
   lastName: string
 }) {
-  return api.post('/auth/signup', payload)
+  return api.post<void>('/auth/signup', payload)
 }
 
 export async function authMe() {
-  return api.get<MeResponse>('/auth/me')
+  return api.get<MeData>('/auth/me')
 }
 
 export async function authRefresh() {
-  return api.post('/auth/refresh')
+  return api.post<void>('/auth/refresh')
 }
 
 export async function authLogin(payload: { username: string; password: string }) {
-  return api.post('/auth/login', payload)
+  return api.post<void>('/auth/login', payload)
 }
 
 export async function authLogout() {
-  return api.post('/auth/logout')
+  return api.post<void>('/auth/logout')
 }
 
 

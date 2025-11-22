@@ -1,31 +1,41 @@
 import { useState } from 'react'
 import { Button, Group, Paper, PasswordInput, Stack, Text, TextInput, Title } from '@mantine/core'
-import { signup } from '@/api/auth'
 import { Link, useNavigate } from 'react-router-dom'
+import { useSignup } from '@/hooks/auth/mutations'
 
 export default function Signup() {
   const navigate = useNavigate()
+  const signupMutation = useSignup()
   const [email, setEmail] = useState('')
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
-  const [submitting, setSubmitting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
 
-  async function onSubmit(e: React.FormEvent) {
+  function onSubmit(e: React.FormEvent) {
     e.preventDefault()
-    setSubmitting(true)
-    setError(null)
-    try {
-      await signup({ email, username, password, firstName, lastName })
-      navigate('/login', { replace: true })
-    } catch (e: any) {
-      setError('Signup failed')
-    } finally {
-      setSubmitting(false)
-    }
+    signupMutation.mutate(
+      { email, username, password, firstName, lastName },
+      {
+        onSuccess: () => {
+          navigate('/login', { replace: true })
+        },
+      }
+    )
   }
+
+  const error = signupMutation.isError
+    ? (() => {
+        const err = signupMutation.error as any
+        const fieldErrors = err?.fieldErrors
+        if (fieldErrors) {
+          return Object.entries(fieldErrors)
+            .map(([field, message]) => `${field}: ${message}`)
+            .join(', ')
+        }
+        return err?.message || 'Signup failed'
+      })()
+    : null
 
   return (
     <Stack p="lg" align="center">
@@ -45,7 +55,7 @@ export default function Signup() {
             onChange={(e) => setPassword(e.currentTarget.value)}
             required
           />
-          <Button type="submit" loading={submitting} disabled={!email || !username || !password}>
+          <Button type="submit" loading={signupMutation.isPending} disabled={!email || !username || !password}>
             Sign up
           </Button>
           <Text size="sm">

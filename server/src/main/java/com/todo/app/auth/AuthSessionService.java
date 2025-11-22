@@ -1,6 +1,5 @@
 package com.todo.app.auth;
 
-import com.todo.app.refreshTokenStore.RefreshTokenStore;
 import com.todo.app.refreshTokenStore.RefreshTokenStoreService;
 import com.todo.app.security.CookieService;
 import com.todo.app.security.JwtService;

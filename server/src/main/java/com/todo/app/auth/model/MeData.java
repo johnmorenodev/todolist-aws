@@ -5,8 +5,8 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class AuthOkResponse {
-    private final boolean ok;
+public class MeData {
+    private boolean authenticated;
+    private String username;
 }
-
 
