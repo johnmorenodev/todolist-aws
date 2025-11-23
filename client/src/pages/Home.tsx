@@ -1,15 +1,27 @@
 import { Button, Group, Stack, Text, Title } from '@mantine/core'
 import { useAuthStore } from '@/stores/auth'
+import { useLogout } from '@/hooks/auth/mutations'
+import { useNavigate } from 'react-router-dom'
 
 export default function Home() {
-  const { username, logout } = useAuthStore()
+  const { username } = useAuthStore()
+  const logoutMutation = useLogout()
+  const navigate = useNavigate()
+
+  function handleLogout() {
+    logoutMutation.mutate(undefined, {
+      onSuccess: () => {
+        navigate('/login', { replace: true })
+      },
+    })
+  }
 
   return (
     <Stack p="lg" gap="md">
       <Title order={2}>Welcome{username ? `, ${username}` : ''}!</Title>
       <Text>You are authenticated.</Text>
       <Group>
-        <Button color="red" onClick={() => logout()}>
+        <Button color="red" onClick={handleLogout} loading={logoutMutation.isPending}>
           Logout
         </Button>
       </Group>

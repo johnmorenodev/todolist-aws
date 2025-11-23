@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { authLogin, authLogout, authRefresh, signup } from '@/api/auth'
 import { queryKeys } from '@/constants/query-keys'
+import { useAuthStore } from '@/stores/auth'
 
 export function useLogin() {
   const queryClient = useQueryClient()
@@ -31,6 +32,7 @@ export function useSignup() {
 
 export function useLogout() {
   const queryClient = useQueryClient()
+  const clearAuth = useAuthStore((state) => state.clearAuth)
 
   return useMutation({
     mutationFn: async () => {
@@ -38,6 +40,7 @@ export function useLogout() {
     },
     onSuccess: () => {
       queryClient.clear()
+      clearAuth()
     },
   })
 }
