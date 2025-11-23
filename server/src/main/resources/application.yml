@@ -1,11 +1,9 @@
+# Base configuration - shared by all profiles
+# Profile-specific settings are in application-{profile}.yml
+
 spring:
   application:
     name: todolist
-  datasource:
-    url: jdbc:postgresql://localhost:5432/todolist
-    driver-class-name: org.postgresql.Driver
-    username: app
-    password: secret
   jackson:
     serialization:
       WRITE_DATES_AS_TIMESTAMPS: false
@@ -19,18 +17,13 @@ logging:
     org.springframework.web: INFO
     org.hibernate.SQL: WARN
 
-# Custom JWT and CORS settings (kept from properties)
+# These can be overridden by env vars or profile-specific YAML
 jwt:
-  secret: 13eOjalvg4QBjotrBt7aWP/egE/Ul7qrpTpAnGglqpVhXilzdQbaafmZSU+ktN1aI6Iiuelg+27U437ERFpvIA==
   access:
     ttl-seconds: 900
   refresh:
     ttl-seconds: 1209600
 
 app:
-  cors:
-    allowed-origin: http://localhost:5174
-  cookies:
-    secure: false
   refresh:
     fallback-enabled: true
