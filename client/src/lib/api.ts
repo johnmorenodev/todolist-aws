@@ -1,5 +1,5 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios'
-import { authRefresh } from '@/api/auth'
+import { authRefresh } from '@/features/auth/mutations'
 import { ApiResponse, ApiErrorResponse } from '@/types/api'
 
 declare module 'axios' {
@@ -16,6 +16,17 @@ export const api = axios.create({
   xsrfHeaderName: 'X-XSRF-TOKEN',
 })
 
+function getCookie(name: string): string | null {
+  if (typeof document === 'undefined') return null
+  const cookies = document.cookie ? document.cookie.split('; ') : []
+  for (const cookie of cookies) {
+    if (cookie.startsWith(name + '=')) {
+      return decodeURIComponent(cookie.substring(name.length + 1))
+    }
+  }
+  return null
+}
+
 async function ensureCsrf() {
   if (typeof document !== 'undefined' && document.cookie.includes('XSRF-TOKEN=')) return
   try {
@@ -29,12 +40,47 @@ api.interceptors.request.use(async (config) => {
   const method = (config.method || 'get').toLowerCase()
   if (['post', 'put', 'patch', 'delete'].includes(method)) {
     await ensureCsrf()
+    if (typeof document !== 'undefined') {
+      const token = getCookie('XSRF-TOKEN')
+      if (token) {
+        config.headers = config.headers ?? {}
+        ;(config.headers as any)['X-XSRF-TOKEN'] = token
+      }
+    }
   }
   return config
 })
 
 let isRefreshing = false
 let pendingRequests: Array<() => void> = []
+let refreshTimer: NodeJS.Timeout | null = null
+
+// Proactive token refresh - refresh tokens every 10 minutes (before 15-minute expiration)
+function setupProactiveRefresh() {
+  if (typeof window === 'undefined') return
+  
+  // Clear existing timer if any
+  if (refreshTimer) {
+    clearInterval(refreshTimer)
+  }
+  
+  // Refresh tokens every 10 minutes (600000 ms)
+  refreshTimer = setInterval(async () => {
+    if (!isRefreshing) {
+      try {
+        await authRefresh()
+      } catch (error) {
+        // Silently fail - if refresh fails, the next request will handle it
+        console.debug('Proactive token refresh failed:', error)
+      }
+    }
+  }, 10 * 60 * 1000) // 10 minutes
+}
+
+// Setup proactive refresh when module loads
+if (typeof window !== 'undefined') {
+  setupProactiveRefresh()
+}
 
 api.interceptors.response.use(
   (res: AxiosResponse<ApiResponse<any>>) => {

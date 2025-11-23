@@ -1,6 +1,6 @@
 import { Button, Group, Stack, Text, Title } from '@mantine/core'
 import { useAuthStore } from '@/stores/auth'
-import { useLogout } from '@/hooks/auth/mutations'
+import { useLogout } from '@/features/auth/mutations'
 import { useNavigate } from 'react-router-dom'
 
 export default function Home() {
@@ -17,7 +17,7 @@ export default function Home() {
   }
 
   return (
-    <Stack p="lg" gap="md">
+    <Stack gap="sm">
       <Title order={2}>Welcome{username ? `, ${username}` : ''}!</Title>
       <Text>You are authenticated.</Text>
       <Group>
