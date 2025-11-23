@@ -1,6 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
 import { api } from "@/lib/api";
-import { CreateAccountRequest } from "../components/AddAccountForm";
 import { accountQueryKeys } from './queryKeys'
 
 // Types
@@ -27,10 +26,6 @@ export async function getAccountList() {
 export async function getAccountSummary(accountId: number) {
   const { data } = await api.get<AccountSummary>(`/account/${accountId}/summary`);
   return data;
-}
-
-export async function createAccount(payload: CreateAccountRequest) {
-  await api.post<void>("/account", payload);
 }
 
 // React Query Hooks

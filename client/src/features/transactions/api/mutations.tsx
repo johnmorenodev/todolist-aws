@@ -1,9 +1,16 @@
 import { useMutation } from "@tanstack/react-query";
+import { api } from "@/lib/api";
 import { queryClient } from "@/lib/query-client";
 import { transactionQueryKeys } from "./queryKeys";
-import { createTransaction, CreateTransactionRequest } from "./queries";
+import { CreateTransactionRequest } from "./queries";
 import { accountQueryKeys } from "@/features/accounts/api/queryKeys";
 
+// API Functions
+export async function createTransaction(payload: CreateTransactionRequest) {
+  await api.post<void>("/transaction", payload);
+}
+
+// React Query Mutation Hooks
 export function useCreateTransaction() {
   return useMutation({
     mutationFn: async (payload: CreateTransactionRequest) => {

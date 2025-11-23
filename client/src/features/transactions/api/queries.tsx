@@ -53,10 +53,6 @@ export async function getTransactionsList(
   return data;
 }
 
-export async function createTransaction(payload: CreateTransactionRequest) {
-  await api.post<void>("/transaction", payload);
-}
-
 // React Query Hooks
 export function useRecentTransactions(accountId: number, limit: number = 10) {
   return useQuery({
