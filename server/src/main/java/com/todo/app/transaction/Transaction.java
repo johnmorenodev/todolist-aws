@@ -58,6 +58,9 @@ public class Transaction extends BaseSoftDeleteEntity {
     @JoinColumn(name = "category_id", referencedColumnName = "id")
     private Category category;
 
+    @Column(name = "transaction_date")
+    private LocalDateTime transactionDate;
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
@@ -71,6 +74,9 @@ public class Transaction extends BaseSoftDeleteEntity {
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
+        if (transactionDate == null) {
+            transactionDate = LocalDateTime.now();
+        }
     }
 
     @PreUpdate

@@ -6,10 +6,12 @@ import java.time.LocalDateTime;
 import lombok.Data;
 
 @Data
-public class TransactionCreateRequest {
+public class TransactionResponse {
+    private Long id;
     private BigDecimal amount;
     private String transactionType;
-    private Integer accountId;
     private String description;
     private LocalDateTime transactionDate;
+    private LocalDateTime createdAt;
 }
+

@@ -36,4 +36,12 @@ public class AccountService {
                 .toList();
     }
 
+    public Account createNewAccount(User user, String name) {
+        Account account = new Account();
+        account.setUser(user);
+        account.setName(name);
+        Account savedAccount = accountRepository.save(account);
+        return savedAccount;
+    }
+
 }

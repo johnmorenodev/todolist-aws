@@ -12,6 +12,8 @@ import com.todo.app.user.UserService;
 import com.todo.app.user.model.UserCreateRequest;
 
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -25,6 +27,8 @@ import java.util.Optional;
 @RequestMapping("/api/auth")
 @Validated
 public class AuthController {
+
+    private static final Logger log = LoggerFactory.getLogger(AuthController.class);
 
     private final JwtService jwtService; //
     private final RefreshTokenStoreService refreshTokenStoreService;
@@ -108,7 +112,11 @@ public class AuthController {
     }
 
     @GetMapping("/csrf")
-    public ResponseEntity<?> csrf() {
+    public ResponseEntity<?> csrf(HttpServletRequest request) {
+        String headerToken = request.getHeader("X-XSRF-TOKEN");
+        String cookieToken = CookieReader.get(request, "XSRF-TOKEN");
+        log.info("Auth CSRF endpoint hit - headerToken={} cookieToken={}",
+                headerToken, cookieToken);
         return ResponseEntity.noContent().build();
     }
 }
