@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react'
 import { Button, Paper, PasswordInput, Stack, Text, TextInput, Title, useMantineTheme } from '@mantine/core'
 import { useAuthStore } from '@/stores/auth'
 import { useLocation, useNavigate, Link } from 'react-router-dom'
-import { useLogin } from '@/features/auth/api/mutations'
-import { useAuthMe } from '@/features/auth/api/queries'
+import { useLogin } from '@/features/auth/mutations'
+import { useAuthMe } from '@/features/auth/queries'
 import { IconLock, IconUser } from '@tabler/icons-react'
 
 export default function Login() {
