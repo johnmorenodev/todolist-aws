@@ -16,7 +16,7 @@ function RecentTransactions({ accountId }: RecentTransactionsProps) {
   const hasTransactions = transactions && Array.isArray(transactions) && transactions.length > 0;
 
   return (
-    <Stack gap={4} className="mb-4">
+    <Stack gap="sm" className="mb-4">
       <Group justify="space-between" align="center">
         <Group gap="xs">
           <IconClock size={20} color={theme.colors.gray[6]} />

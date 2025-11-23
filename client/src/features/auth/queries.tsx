@@ -1,18 +1,25 @@
 import { useQuery } from '@tanstack/react-query'
-import { authMe, MeData } from '@/api/auth'
-import { queryKeys } from '@/constants/query-keys'
+import { api } from '@/lib/api'
+import { authQueryKeys } from './queryKeys'
 
+// Types
+export type MeData = { authenticated: boolean; username: string | null }
+
+// API Functions
+export async function authMe() {
+  const { data } = await api.get<MeData>('/auth/me')
+  return data
+}
+
+// React Query Hooks
 export function useAuthMe() {
   return useQuery({
-    queryKey: queryKeys.auth.me,
+    queryKey: authQueryKeys.me(),
     queryFn: async () => {
-      const { data } = await authMe()
-      return data
+      return await authMe()
     },
     retry: false,
     staleTime: 5 * 60 * 1000,
   })
 }
-
-export type { MeData }
 

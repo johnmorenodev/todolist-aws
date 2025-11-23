@@ -13,8 +13,18 @@ function Accounts() {
   return (
     <Stack gap="lg">
       <div>
-        <Title order={1} fw={700}>My Accounts</Title>
-        <Text c="dimmed" size="sm" mt="xs">Manage your financial accounts</Text>
+        <Title 
+          order={1} 
+          fw={700}
+          style={{ 
+            fontSize: 'clamp(1.25rem, 4vw, 2rem)',
+          }}
+        >
+          My Accounts
+        </Title>
+        <Text c="dimmed" size="sm" mt="xs" >
+          Manage your financial accounts
+        </Text>
       </div>
       {isLoading && <div>Loading...</div>}
       {isError && (

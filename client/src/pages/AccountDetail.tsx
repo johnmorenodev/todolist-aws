@@ -38,7 +38,7 @@ function AccountDetail() {
         <ActionIcon 
           variant="subtle" 
           onClick={() => navigate("/accounts")} 
-          size="lg"
+          size="md"
           style={{
             transition: 'all 0.2s ease',
             flexShrink: 0,
@@ -50,9 +50,17 @@ function AccountDetail() {
             e.currentTarget.style.transform = 'translateX(0)';
           }}
         >
-          <IconArrowLeft size={20} />
+          <IconArrowLeft size={18} />
         </ActionIcon>
-        <Title order={1} fw={700} style={{ flex: 1, minWidth: 0 }}>
+        <Title 
+          order={1} 
+          fw={700} 
+          style={{ 
+            flex: 1, 
+            minWidth: 0,
+            fontSize: 'clamp(1.125rem, 4vw, 1.75rem)',
+          }}
+        >
           {accountSummary.name}
         </Title>
       </Group>

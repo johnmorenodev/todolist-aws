@@ -91,7 +91,7 @@ function AccountTransactions() {
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+        if (entries[0]?.isIntersecting && hasNextPage && !isFetchingNextPage) {
           fetchNextPage();
         }
       },
@@ -139,7 +139,7 @@ function AccountTransactions() {
         <ActionIcon 
           variant="subtle" 
           onClick={() => navigate(`/accounts/${accountId}`)} 
-          size="lg"
+          size="md"
           style={{
             transition: 'all 0.2s ease',
             flexShrink: 0,
@@ -151,9 +151,17 @@ function AccountTransactions() {
             e.currentTarget.style.transform = 'translateX(0)';
           }}
         >
-          <IconArrowLeft size={20} />
+          <IconArrowLeft size={18} />
         </ActionIcon>
-        <Title order={1} fw={700} style={{ flex: 1, minWidth: 0 }}>
+        <Title 
+          order={1} 
+          fw={700} 
+          style={{ 
+            flex: 1, 
+            minWidth: 0,
+            fontSize: 'clamp(1.125rem, 4vw, 1.75rem)',
+          }}
+        >
           {accountSummary.name} - All Transactions
         </Title>
       </Group>
@@ -229,7 +237,7 @@ function AccountTransactions() {
               label="Start Date"
               placeholder="Select start date"
               value={customStartDate}
-              onChange={setCustomStartDate}
+              onChange={(value) => setCustomStartDate(value as Date | null)}
               size="md"
               style={{ background: 'white' }}
             />
@@ -237,7 +245,7 @@ function AccountTransactions() {
               label="End Date"
               placeholder="Select end date"
               value={customEndDate}
-              onChange={setCustomEndDate}
+              onChange={(value) => setCustomEndDate(value as Date | null)}
               size="md"
               style={{ background: 'white' }}
             />

@@ -1,5 +1,5 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios'
-import { authRefresh } from '@/api/auth'
+import { authRefresh } from '@/features/auth/mutations'
 import { ApiResponse, ApiErrorResponse } from '@/types/api'
 
 declare module 'axios' {

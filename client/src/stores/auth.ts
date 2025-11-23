@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { MeData } from '@/api/auth'
+import { MeData } from '@/features/auth/queries'
 
 type AuthState = {
   isAuthenticated: boolean

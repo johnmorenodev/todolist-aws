@@ -8,11 +8,11 @@ import React from "react";
 const createTransactionSchema = z.object({
   amount: z.number().positive("Amount must be greater than 0"),
   transactionType: z.enum(["income", "expense"], {
-    required_error: "Please select a transaction type",
+    message: "Please select a transaction type",
   }),
   description: z.string().optional(),
   transactionDate: z.date({
-    required_error: "Transaction date is required",
+    message: "Transaction date is required",
   }),
 });
 
@@ -28,7 +28,7 @@ function AddTransaction({ accountId, onSuccess }: Props) {
   const form = useForm<CreateTransactionFormData>({
     initialValues: {
       amount: 0,
-      transactionType: undefined,
+      transactionType: "income" as "income" | "expense",
       description: "",
       transactionDate: new Date(),
     },
