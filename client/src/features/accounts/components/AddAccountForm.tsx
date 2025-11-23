@@ -57,7 +57,7 @@ function AddAccountForm({ opened, open, close }: Props) {
       radius="md"
     >
       <form onSubmit={form.onSubmit(onSubmit)}>
-        <Stack gap="md">
+        <Stack gap="sm">
           <TextInput 
             label="Account Name" 
             placeholder="Enter account name"

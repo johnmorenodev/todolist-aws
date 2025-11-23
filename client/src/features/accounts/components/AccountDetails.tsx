@@ -52,7 +52,6 @@ function AccountDetails({ account }: AccountDetailsProps) {
       <Card 
         withBorder 
         radius="md" 
-        className="mb-4"
         shadow="sm"
         style={{
           background: theme.other?.cardBackground || '#ffffff',
@@ -75,9 +74,9 @@ function AccountDetails({ account }: AccountDetailsProps) {
           </Button>
         </Group>
       </Card>
-      <Stack gap="sm" className="mb-4">
+      <Stack gap="sm">
         <Text size="lg" fw={600}>Summary</Text>
-        <Group gap="md" grow>
+        <Group gap="sm" grow>
           <Card 
             withBorder 
             radius="md" 

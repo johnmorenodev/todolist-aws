@@ -11,7 +11,7 @@ function Accounts() {
   const [accountModalOpened, { open: openAccountModal, close: closeAccountModal }] = useDisclosure(false);
 
   return (
-    <Stack gap="lg">
+    <Stack gap="sm">
       <div>
         <Title 
           order={1} 

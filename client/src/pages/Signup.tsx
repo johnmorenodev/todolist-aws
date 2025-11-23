@@ -54,7 +54,7 @@ export default function Signup() {
           background: theme.other?.cardBackground || '#ffffff',
         }}
       >
-        <Stack gap="lg">
+        <Stack gap="sm">
           <div style={{ textAlign: 'center' }}>
             <Title order={2} fw={700}>Create Account</Title>
             <Text c="dimmed" size="sm" mt="xs">Join us and start managing your finances</Text>

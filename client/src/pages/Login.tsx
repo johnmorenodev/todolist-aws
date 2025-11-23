@@ -52,7 +52,7 @@ export default function Login() {
           background: theme.other?.cardBackground || '#ffffff',
         }}
       >
-        <Stack gap="lg">
+        <Stack gap="sm">
           <div style={{ textAlign: 'center' }}>
             <Title order={2} fw={700}>Welcome Back</Title>
             <Text c="dimmed" size="sm" mt="xs">Sign in to continue</Text>

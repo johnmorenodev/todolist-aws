@@ -49,7 +49,7 @@ function AddTransaction({ accountId, onSuccess }: Props) {
 
   return (
     <form onSubmit={form.onSubmit(handleSubmit)}>
-      <Stack gap="lg">
+      <Stack gap="sm">
         <NumberInput
           label="Amount"
           placeholder="Enter amount"

@@ -33,7 +33,7 @@ function AccountDetail() {
   }
 
   return (
-    <Stack gap="md">
+    <Stack gap="sm">
       <Group gap="sm" align="center" wrap="nowrap">
         <ActionIcon 
           variant="subtle" 

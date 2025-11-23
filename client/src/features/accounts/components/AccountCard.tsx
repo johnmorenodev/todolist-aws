@@ -13,7 +13,7 @@ function AccountCard({ data }: AccountCardProps) {
   const theme = useMantineTheme();
 
   return (
-    <Stack gap="md">
+    <Stack gap="sm">
       {data.map((account) => {
         const isPositive = account.balance >= 0;
         const balanceColor = isPositive 

@@ -1,16 +1,17 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useAccountSummary } from "@/features/accounts/api/queries";
 import { useAccountTransactionsInfinite } from "@/features/transactions/api/queries";
-import { Text, ActionIcon, Stack, Group, TextInput, Select, Title } from "@mantine/core";
+import { Text, ActionIcon, Stack, Group, TextInput, Select, Title, Divider, useMantineTheme } from "@mantine/core";
 import { DateInput } from "@mantine/dates";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import { IconX, IconArrowLeft, IconSearch } from "@tabler/icons-react";
 import TransactionCard from "@/features/transactions/components/TransactionCard";
-import { TransactionFilter } from "@/features/transactions/api/queries";
+import { TransactionFilter, Transaction } from "@/features/transactions/api/queries";
 
 function AccountTransactions() {
   const { accountId } = useParams<{ accountId: string }>();
   const navigate = useNavigate();
+  const theme = useMantineTheme();
   const accountIdNum = accountId ? Number(accountId) : 0;
   const { data: accountSummary, isLoading: isLoadingAccount } = useAccountSummary(accountIdNum);
   const loadMoreRef = useRef<HTMLDivElement>(null);
@@ -88,6 +89,59 @@ function AccountTransactions() {
 
   const transactions = data?.pages.flat() || [];
 
+  const groupedTransactions = useMemo(() => {
+    const groups: Record<string, Transaction[]> = {};
+    
+    transactions.forEach((transaction) => {
+      const dateStr = transaction.transactionDate || transaction.createdAt;
+      if (!dateStr) return;
+      
+      const date = new Date(dateStr);
+      if (isNaN(date.getTime())) return;
+      
+      const year = date.getFullYear();
+      const month = date.getMonth();
+      const key = `${year}-${month}`;
+      
+      if (!groups[key]) {
+        groups[key] = [];
+      }
+      groups[key].push(transaction);
+    });
+    
+    // Sort transactions within each group by date (newest first)
+    Object.keys(groups).forEach((key) => {
+      const group = groups[key];
+      if (group) {
+        group.sort((a, b) => {
+          const dateA = new Date(a.transactionDate || a.createdAt).getTime();
+          const dateB = new Date(b.transactionDate || b.createdAt).getTime();
+          return dateB - dateA;
+        });
+      }
+    });
+    
+    // Sort groups by date (newest first)
+    return Object.entries(groups).sort(([keyA], [keyB]) => {
+      const partsA = keyA.split('-').map(Number);
+      const partsB = keyB.split('-').map(Number);
+      const yearA = partsA[0] ?? 0;
+      const monthA = partsA[1] ?? 0;
+      const yearB = partsB[0] ?? 0;
+      const monthB = partsB[1] ?? 0;
+      if (yearA !== yearB) return yearB - yearA;
+      return monthB - monthA;
+    });
+  }, [transactions]);
+
+  const formatMonthLabel = (year: number, month: number): string => {
+    const monthNames = [
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"
+    ];
+    return `${monthNames[month]} ${year}`;
+  };
+
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -134,7 +188,7 @@ function AccountTransactions() {
   }
 
   return (
-    <Stack gap="lg">
+    <Stack gap="sm">
       <Group gap="sm" align="center" wrap="nowrap">
         <ActionIcon 
           variant="subtle" 
@@ -175,8 +229,8 @@ function AccountTransactions() {
           background: 'white',
         }}
       />
-      <Stack gap="sm" className="mb-4">
-        <Group gap="md" align="flex-end">
+      <Stack gap="sm">
+        <Group gap="sm" align="flex-end">
           <Select
             label="Date Range"
             placeholder="Select date range"
@@ -232,7 +286,7 @@ function AccountTransactions() {
           )}
         </Group>
         {dateFilter === "custom" && (
-          <Group gap="md" grow>
+          <Group gap="sm" grow>
             <DateInput
               label="Start Date"
               placeholder="Select start date"
@@ -262,9 +316,38 @@ function AccountTransactions() {
         </Text>
       ) : (
         <Stack gap="sm">
-          {transactions.map((transaction) => (
-            <TransactionCard key={transaction.id} transaction={transaction} />
-          ))}
+          {groupedTransactions.map(([key, monthTransactions]) => {
+            const parts = key.split('-').map(Number);
+            const year = parts[0] ?? new Date().getFullYear();
+            const month = parts[1] ?? new Date().getMonth();
+            return (
+              <Stack key={key} gap="sm">
+                <Group gap="xs" align="center" mt="xs">
+                  <Text 
+                    size="md" 
+                    fw={600} 
+                    c="dimmed"
+                    style={{
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.5px',
+                      fontSize: '0.875rem',
+                    }}
+                  >
+                    {formatMonthLabel(year, month)}
+                  </Text>
+                  <Divider 
+                    style={{ flex: 1 }} 
+                    color={theme.colors.gray[3]}
+                  />
+                </Group>
+                <Stack gap="sm">
+                  {monthTransactions.map((transaction) => (
+                    <TransactionCard key={transaction.id} transaction={transaction} />
+                  ))}
+                </Stack>
+              </Stack>
+            );
+          })}
           <div ref={loadMoreRef}>
             {isFetchingNextPage && <Text ta="center" c="dimmed">Loading more...</Text>}
             {!hasNextPage && transactions.length > 0 && (
