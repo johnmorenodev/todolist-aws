@@ -49,7 +49,7 @@ export default function App() {
         <Route path="/signup" element={<Signup />} />
         <Route
           path="*"
-          element={<Navigate to="/" state={{ from: location }} replace />}
+          element={<Navigate to="/accounts" state={{ from: location }} replace />}
         />
       </Routes>
     </Container>

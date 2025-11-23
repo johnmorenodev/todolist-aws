@@ -1,18 +1,18 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useAccountList } from "@/hooks/accounts/queries";
-import { Text, ActionIcon, Card, Stack, Group, TextInput, Select } from "@mantine/core";
+import { useAccountSummary } from "@/hooks/accounts/queries";
+import { useAccountTransactionsInfinite } from "@/hooks/accounts/transactionQueries";
+import { Text, ActionIcon, Stack, Group, TextInput, Select } from "@mantine/core";
 import { DateInput } from "@mantine/dates";
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
-import { getTransactionsByAccount } from "@/features/accounts/api/transactions";
-import { transactionQueryKeys } from "@/features/accounts/api/queryKeys";
 import { useEffect, useRef, useState } from "react";
-import { formatDate } from "@/utils/date";
 import { IconX } from "@tabler/icons-react";
+import TransactionCard from "@/features/accounts/components/TransactionCard";
+import { TransactionFilter } from "@/features/accounts/api/transactions";
 
 function AccountTransactions() {
   const { accountId } = useParams<{ accountId: string }>();
   const navigate = useNavigate();
-  const { data: accounts } = useAccountList();
+  const accountIdNum = accountId ? Number(accountId) : 0;
+  const { data: accountSummary, isLoading: isLoadingAccount } = useAccountSummary(accountIdNum);
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -20,8 +20,6 @@ function AccountTransactions() {
   const [transactionTypeFilter, setTransactionTypeFilter] = useState<string>("all");
   const [customStartDate, setCustomStartDate] = useState<Date | null>(null);
   const [customEndDate, setCustomEndDate] = useState<Date | null>(null);
-
-  const account = accounts?.find((acc) => acc.accountId === Number(accountId));
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -78,67 +76,17 @@ function AccountTransactions() {
   const dateParams = getDateRangeParams();
   const hasFilters = dateFilter !== "all" || transactionTypeFilter !== "all" || debouncedSearch.trim() !== "";
 
-  const infiniteQuery = useInfiniteQuery({
-    queryKey: [
-      ...transactionQueryKeys.byAccount(Number(accountId)), 
-      "infinite",
-      dateFilter,
-      transactionTypeFilter,
-      customStartDate?.toISOString(),
-      customEndDate?.toISOString(),
-    ],
-    queryFn: async ({ pageParam }) => {
-      const result = await getTransactionsByAccount(
-        Number(accountId), 
-        20, 
-        pageParam,
-        undefined,
-        dateParams.startDate,
-        dateParams.endDate,
-        transactionTypeFilter
-      );
-      return Array.isArray(result) ? result : [];
-    },
-    getNextPageParam: (lastPage, allPages) => {
-      if (lastPage.length < 20) {
-        return undefined;
-      }
-      return allPages.length;
-    },
-    initialPageParam: 0,
-    enabled: !debouncedSearch.trim() && !hasFilters,
-  });
+  const filter: TransactionFilter = {
+    search: debouncedSearch.trim() || undefined,
+    startDate: dateParams.startDate,
+    endDate: dateParams.endDate,
+    transactionType: transactionTypeFilter !== "all" ? transactionTypeFilter : undefined,
+  };
 
-  const filteredQuery = useQuery({
-    queryKey: [
-      ...transactionQueryKeys.byAccount(Number(accountId)), 
-      "filtered",
-      debouncedSearch,
-      dateFilter,
-      transactionTypeFilter,
-      customStartDate?.toISOString(),
-      customEndDate?.toISOString(),
-    ],
-    queryFn: async () => {
-      const result = await getTransactionsByAccount(
-        Number(accountId), 
-        1000, 
-        0,
-        debouncedSearch || undefined,
-        dateParams.startDate,
-        dateParams.endDate,
-        transactionTypeFilter
-      );
-      return Array.isArray(result) ? result : [];
-    },
-    enabled: debouncedSearch.trim() !== "" || hasFilters,
-  });
+  const infiniteQuery = useAccountTransactionsInfinite(accountIdNum, filter);
+  const { data, isLoading, isError, fetchNextPage, hasNextPage, isFetchingNextPage } = infiniteQuery;
 
-  const isLoading = hasFilters ? filteredQuery.isLoading : infiniteQuery.isLoading;
-  const isError = hasFilters ? filteredQuery.isError : infiniteQuery.isError;
-  const fetchNextPage = infiniteQuery.fetchNextPage;
-  const hasNextPage = infiniteQuery.hasNextPage;
-  const isFetchingNextPage = infiniteQuery.isFetchingNextPage;
+  const transactions = data?.pages.flat() || [];
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -161,12 +109,6 @@ function AccountTransactions() {
     };
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  const isIncome = (transactionType: string) => transactionType === "income";
-
-  const transactions = hasFilters
-    ? (filteredQuery.data || [])
-    : (infiniteQuery.data?.pages.flat() || []);
-
   const handleClearFilters = () => {
     setSearchTerm("");
     setDebouncedSearch("");
@@ -176,24 +118,28 @@ function AccountTransactions() {
     setCustomEndDate(null);
   };
 
-  if (!account) {
+  if (isLoadingAccount) {
+    return <div>Loading account...</div>;
+  }
+
+  if (!accountSummary) {
     return (
-      <div className="mx-4">
+      <>
         <div className="text-red-500">Account not found</div>
         <ActionIcon variant="subtle" onClick={() => navigate("/accounts")} className="mt-4" size="lg">
           ←
         </ActionIcon>
-      </div>
+      </>
     );
   }
 
   return (
-    <div className="mx-4">
-      <ActionIcon variant="subtle" onClick={() => navigate(`/accounts/${accountId}`)} className="mb-4" size="lg">
+    <>
+      <ActionIcon variant="subtle" onClick={() => navigate(`/accounts/${accountId}`)} className="mb-2" size="lg">
         ←
       </ActionIcon>
       <Text size="xl" fw={600} className="mb-4">
-        {account.name} - All Transactions
+        {accountSummary.name} - All Transactions
       </Text>
       <TextInput
         placeholder="Search by description..."
@@ -279,51 +225,18 @@ function AccountTransactions() {
         </Text>
       ) : (
         <Stack gap="sm">
-          {transactions.map((transaction) => {
-            const income = isIncome(transaction.transactionType);
-            return (
-              <Card
-                key={transaction.id}
-                withBorder
-                radius="md"
-                p="md"
-                style={{
-                  borderColor: income ? "#51cf66" : "#ff6b6b",
-                  backgroundColor: income ? "#f0f9f4" : "#fff5f5",
-                }}
-              >
-                <Group justify="space-between">
-                  <div>
-                    <Text size="sm" c="dimmed">
-                      {formatDate(transaction.transactionDate || transaction.createdAt)}
-                    </Text>
-                    <Text fw={500} size="md">
-                      {transaction.description || "No description"}
-                    </Text>
-                  </div>
-                  <Text
-                    fw={600}
-                    size="lg"
-                    c={income ? "#51cf66" : "#ff6b6b"}
-                  >
-                    {income ? "+" : "-"}
-                    {transaction.amount.toLocaleString()}
-                  </Text>
-                </Group>
-              </Card>
-            );
-          })}
-          {!hasFilters && (
-            <div ref={loadMoreRef}>
-              {isFetchingNextPage && <Text ta="center" c="dimmed">Loading more...</Text>}
-              {!hasNextPage && transactions.length > 0 && (
-                <Text ta="center" c="dimmed">No more transactions</Text>
-              )}
-            </div>
-          )}
+          {transactions.map((transaction) => (
+            <TransactionCard key={transaction.id} transaction={transaction} />
+          ))}
+          <div ref={loadMoreRef}>
+            {isFetchingNextPage && <Text ta="center" c="dimmed">Loading more...</Text>}
+            {!hasNextPage && transactions.length > 0 && (
+              <Text ta="center" c="dimmed">No more transactions</Text>
+            )}
+          </div>
         </Stack>
       )}
-    </div>
+    </>
   );
 }
 

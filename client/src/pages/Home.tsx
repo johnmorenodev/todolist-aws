@@ -17,7 +17,7 @@ export default function Home() {
   }
 
   return (
-    <Stack p="lg" gap="md">
+    <Stack gap="md">
       <Title order={2}>Welcome{username ? `, ${username}` : ''}!</Title>
       <Text>You are authenticated.</Text>
       <Group>

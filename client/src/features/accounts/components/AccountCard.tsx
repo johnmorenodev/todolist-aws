@@ -1,10 +1,10 @@
 import { Card, Text, Stack, Group } from "@mantine/core";
 import { useNavigate } from "react-router-dom";
 import React from "react";
-import { AccountSummary } from "@/features/accounts/api";
+import { AccountListItem } from "@/features/accounts/api";
 
 interface AccountCardProps {
-  data: AccountSummary[];
+  data: AccountListItem[];
 }
 
 function AccountCard({ data }: AccountCardProps) {
@@ -13,6 +13,9 @@ function AccountCard({ data }: AccountCardProps) {
   return (
     <Stack gap="md">
       {data.map((account) => {
+        const isPositive = account.balance >= 0;
+        const balanceColor = isPositive ? "#51cf66" : "#ff6b6b";
+        
         return (
           <Card
             key={account.accountId}
@@ -26,7 +29,7 @@ function AccountCard({ data }: AccountCardProps) {
               <Text size="lg" fw={600}>
                 {account.name}
               </Text>
-              <Text size="lg" fw={500}>
+              <Text size="lg" fw={500} c={balanceColor}>
                 {account.balance.toLocaleString()}
               </Text>
             </Group>

@@ -1,18 +1,8 @@
 /*
 * Tanstack queries related to accounts
+* 
+* NOTE: This file is deprecated. Use hooks from @/hooks/accounts/queries instead.
 */
 
-import { useQuery } from "@tanstack/react-query";
-import { getAccountList } from "@/features/accounts/api";
-import { accountQueryKeys } from "./queryKeys";
-
-export function useAccountList() {
-  return useQuery({
-    queryKey: accountQueryKeys.list(),
-    queryFn: async () => {
-      const { data } = await getAccountList();
-      return data;
-    },
-  });
-}
+export { useAccountList, useAccountSummary } from "@/hooks/accounts/queries";
 

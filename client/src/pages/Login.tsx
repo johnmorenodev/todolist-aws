@@ -15,7 +15,7 @@ export default function Login() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
 
-  const redirect = new URLSearchParams(location.search).get('redirect') || '/'
+  const redirect = new URLSearchParams(location.search).get('redirect') || '/accounts'
 
   useEffect(() => {
     if (isAuthenticated || authData?.authenticated) {
@@ -36,8 +36,8 @@ export default function Login() {
   }
 
   return (
-    <Stack p="lg" align="center">
-      <Paper w={420} p="lg" withBorder shadow="sm" radius="md" component="form" onSubmit={onSubmit}>
+    <Stack align="center">
+      <Paper w="100%" maw={420} p="lg" withBorder shadow="sm" radius="md" component="form" onSubmit={onSubmit}>
         <Stack>
           <Title order={3}>Login</Title>
           {loginMutation.isError && (

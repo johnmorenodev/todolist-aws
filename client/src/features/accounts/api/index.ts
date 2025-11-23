@@ -1,18 +1,30 @@
 import { api } from "@/lib/api";
 import { CreateAccountRequest } from "../components/AddAccountForm";
 
+export type AccountListItem = {
+  accountId: number;
+  name: string;
+  balance: number;
+};
+
 export type AccountSummary = {
+  accountId: number;
   name: string;
   income: number;
   expense: number;
   balance: number;
-  accountId: number;
 };
 
 export async function getAccountList() {
-  return api.get<AccountSummary[]>("/account");
+  const { data } = await api.get<AccountListItem[]>("/account");
+  return data;
+}
+
+export async function getAccountSummary(accountId: number) {
+  const { data } = await api.get<AccountSummary>(`/account/${accountId}/summary`);
+  return data;
 }
 
 export async function createAccount(payload: CreateAccountRequest) {
-  return api.post<AccountSummary>("/account", payload);
+  await api.post<void>("/account", payload);
 }

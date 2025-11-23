@@ -18,7 +18,7 @@ export function RequireAuth({ children }: PropsWithChildren) {
 
   const redirectPath = useMemo(() => {
     const path = location.pathname + location.search
-    return path || '/'
+    return path || '/accounts'
   }, [location.pathname, location.search])
 
   if (isLoading) return null

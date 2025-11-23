@@ -17,28 +17,39 @@ export type CreateTransactionRequest = {
   transactionDate?: string;
 };
 
-export async function getTransactionsByAccount(
-  accountId: number, 
-  limit: number = 10, 
-  page: number = 0, 
-  search?: string,
-  startDate?: string,
-  endDate?: string,
-  transactionType?: string
+export type TransactionFilter = {
+  search?: string;
+  startDate?: string;
+  endDate?: string;
+  transactionType?: string;
+};
+
+export async function getRecentTransactions(accountId: number, limit: number = 10) {
+  const { data } = await api.get<Transaction[]>(`/transaction/account/${accountId}/recent?limit=${limit}`);
+  return data;
+}
+
+export async function getTransactionsList(
+  accountId: number,
+  page: number = 0,
+  size: number = 20,
+  filter?: TransactionFilter
 ) {
   const params = new URLSearchParams();
-  params.append("limit", limit.toString());
   params.append("page", page.toString());
-  if (search) params.append("search", search);
-  if (startDate) params.append("startDate", startDate);
-  if (endDate) params.append("endDate", endDate);
-  if (transactionType && transactionType !== "all") params.append("transactionType", transactionType);
+  params.append("size", size.toString());
+  if (filter?.search) params.append("search", filter.search);
+  if (filter?.startDate) params.append("startDate", filter.startDate);
+  if (filter?.endDate) params.append("endDate", filter.endDate);
+  if (filter?.transactionType && filter.transactionType !== "all") {
+    params.append("transactionType", filter.transactionType);
+  }
   
-  const { data } = await api.get<Transaction[]>(`/transaction/account/${accountId}?${params.toString()}`);
+  const { data } = await api.get<Transaction[]>(`/transaction/account/${accountId}/list?${params.toString()}`);
   return data;
 }
 
 export async function createTransaction(payload: CreateTransactionRequest) {
-  return api.post("/transaction", payload);
+  await api.post<void>("/transaction", payload);
 }
 

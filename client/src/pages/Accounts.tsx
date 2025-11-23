@@ -9,7 +9,7 @@ function Accounts() {
   const [accountModalOpened, { open: openAccountModal, close: closeAccountModal }] = useDisclosure(false);
 
   return (
-    <div className="mx-4">
+    <>
       {isLoading && <div>Loading...</div>}
       {isError && (
         <div className="text-red-500">
@@ -23,7 +23,7 @@ function Accounts() {
         </>
       )}
       <AddAccountForm opened={accountModalOpened} open={openAccountModal} close={closeAccountModal} />
-    </div>
+    </>
   );
 }
 

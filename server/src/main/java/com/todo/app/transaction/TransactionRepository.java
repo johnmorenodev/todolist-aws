@@ -12,7 +12,7 @@ import org.springframework.data.repository.query.Param;
 import com.todo.app.account.Account;
 import com.todo.app.transactionType.TransactionTypeConstants;
 
-public interface TransactionRepository extends JpaRepository<Transaction, Long> {
+public interface TransactionRepository extends JpaRepository<Transaction, Long>, TransactionRepositoryCustom {
     @Query("""
             SELECT COALESCE(SUM(t.amount), 0)
             FROM Transaction t

@@ -36,30 +36,33 @@ function AccountDetails({ account }: AccountDetailsProps) {
     closeTransactionModal();
   }
 
+  const isPositive = account.balance >= 0;
+  const balanceColor = isPositive ? "#51cf66" : "#ff6b6b";
+
   return (
     <>
       <Card withBorder radius="md" className="mb-4">
         <Group justify="space-between">
           <div>
             <Text size="sm" c="dimmed">Current Balance</Text>
-            <Title order={2}>{account.balance.toLocaleString()}</Title>
+            <Title order={2} c={balanceColor}>{account.balance.toLocaleString()}</Title>
           </div>
           <Button onClick={openTransactionModal}>+</Button>
         </Group>
       </Card>
-      <Stack gap="md" className="mb-4">
+      <Stack gap="sm" className="mb-4">
         <Text size="lg" fw={500}>Summary</Text>
         <Group gap="md" grow>
-          <Card withBorder radius="md" style={{ borderColor: '#51cf66', backgroundColor: '#f0f9f4' }}>
-            <Stack gap="xs">
-              <Text size="sm" c="dimmed">Income</Text>
-              <Title order={3} c="#51cf66">{account.income.toLocaleString()}</Title>
+          <Card withBorder radius="md" p="sm" style={{ borderColor: '#51cf66', backgroundColor: '#f0f9f4' }}>
+            <Stack gap={4}>
+              <Text size="xs" c="dimmed">Income</Text>
+              <Title order={4} c="#51cf66">{account.income.toLocaleString()}</Title>
             </Stack>
           </Card>
-          <Card withBorder radius="md" style={{ borderColor: '#ff6b6b', backgroundColor: '#fff5f5' }}>
-            <Stack gap="xs">
-              <Text size="sm" c="dimmed">Expense</Text>
-              <Title order={3} c="#ff6b6b">{account.expense.toLocaleString()}</Title>
+          <Card withBorder radius="md" p="sm" style={{ borderColor: '#ff6b6b', backgroundColor: '#fff5f5' }}>
+            <Stack gap={4}>
+              <Text size="xs" c="dimmed">Expense</Text>
+              <Title order={4} c="#ff6b6b">{account.expense.toLocaleString()}</Title>
             </Stack>
           </Card>
         </Group>

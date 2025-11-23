@@ -8,8 +8,7 @@ import { createTransaction, CreateTransactionRequest } from "./transactions";
 export function useCreateAccount() {
     return useMutation({
       mutationFn: async (payload: CreateAccountRequest) => {
-        const { data } = await createAccount(payload);
-        return data;
+        await createAccount(payload);
       },
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: accountQueryKeys.list() });
@@ -24,7 +23,9 @@ export function useCreateTransaction() {
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: accountQueryKeys.list() });
-      queryClient.invalidateQueries({ queryKey: transactionQueryKeys.byAccount(variables.accountId) });
+      queryClient.invalidateQueries({ queryKey: accountQueryKeys.summary(variables.accountId) });
+      queryClient.invalidateQueries({ queryKey: transactionQueryKeys.recent(variables.accountId) });
+      queryClient.invalidateQueries({ queryKey: transactionQueryKeys.list(variables.accountId) });
     },
   });
 }

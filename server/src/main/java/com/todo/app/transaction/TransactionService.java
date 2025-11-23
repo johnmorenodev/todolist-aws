@@ -6,9 +6,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.todo.app.account.Account;
+import com.todo.app.transaction.model.TransactionFilter;
 import com.todo.app.transaction.model.TransactionResponse;
 import com.todo.app.transactionType.TransactionType;
 
@@ -33,63 +36,35 @@ public class TransactionService {
     }
 
     public List<TransactionResponse> getRecentTransactions(Account account, int limit) {
-        return getTransactions(account, 0, limit);
+        TransactionFilter emptyFilter = new TransactionFilter(null, null, null, null);
+        Pageable pageable = PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, "date"));
+        
+        List<Transaction> transactions = transactionRepository.findByAccountWithFilters(account, emptyFilter, pageable);
+        
+        return transactions.stream().map(this::toTransactionResponse).collect(Collectors.toList());
     }
 
-    public List<TransactionResponse> getTransactions(Account account, int page, int limit) {
-        return getTransactions(account, page, limit, null);
-    }
-
-    public List<TransactionResponse> getTransactions(Account account, int page, int limit, String search) {
-        return getTransactions(account, page, limit, search, null, null, null);
-    }
-
-    public List<TransactionResponse> getTransactions(
-        Account account, 
-        int page, 
-        int limit, 
-        String search, 
-        LocalDateTime startDate, 
-        LocalDateTime endDate, 
-        String transactionType
+    public List<TransactionResponse> getTransactionsPage(
+        Account account,
+        int page,
+        int size,
+        TransactionFilter filter
     ) {
-        List<Transaction> transactions;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "date"));
         
-        boolean hasFilters = (startDate != null || endDate != null || 
-                             (transactionType != null && !transactionType.trim().isEmpty()) ||
-                             (search != null && !search.trim().isEmpty()));
+        List<Transaction> transactions = transactionRepository.findByAccountWithFilters(account, filter, pageable);
         
-        if (hasFilters) {
-            int offset = page * limit;
-            // Use sentinel values for NULL parameters to avoid PostgreSQL type inference issues
-            LocalDateTime sentinelStartDate = LocalDateTime.of(1970, 1, 1, 0, 0, 0);
-            LocalDateTime sentinelEndDate = LocalDateTime.of(9999, 12, 31, 23, 59, 59);
-            
-            transactions = transactionRepository.findByAccountWithFilters(
-                account.getId(),
-                search != null && !search.trim().isEmpty() ? search.trim() : "",
-                startDate != null ? startDate : sentinelStartDate,
-                endDate != null ? endDate : sentinelEndDate,
-                transactionType != null && !transactionType.equals("all") ? transactionType : "",
-                limit,
-                offset
-            );
-        } else {
-            transactions = transactionRepository.findByAccountOrderByCreatedAtDesc(
-                account, 
-                PageRequest.of(page, limit)
-            );
-        }
-        
-        return transactions.stream().map(transaction -> {
-            TransactionResponse response = new TransactionResponse();
-            response.setId(transaction.getId());
-            response.setAmount(transaction.getAmount());
-            response.setTransactionType(transaction.getTransactionType().getName());
-            response.setDescription(transaction.getDescription());
-            response.setTransactionDate(transaction.getTransactionDate());
-            response.setCreatedAt(transaction.getCreatedAt());
-            return response;
-        }).collect(Collectors.toList());
+        return transactions.stream().map(this::toTransactionResponse).collect(Collectors.toList());
+    }
+
+    private TransactionResponse toTransactionResponse(Transaction transaction) {
+        TransactionResponse response = new TransactionResponse();
+        response.setId(transaction.getId());
+        response.setAmount(transaction.getAmount());
+        response.setTransactionType(transaction.getTransactionType().getName());
+        response.setDescription(transaction.getDescription());
+        response.setTransactionDate(transaction.getTransactionDate());
+        response.setCreatedAt(transaction.getCreatedAt());
+        return response;
     }
 }

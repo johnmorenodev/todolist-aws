@@ -38,8 +38,8 @@ export default function Signup() {
     : null
 
   return (
-    <Stack p="lg" align="center">
-      <Paper w={520} p="lg" withBorder shadow="sm" radius="md" component="form" onSubmit={onSubmit}>
+    <Stack align="center">
+      <Paper w="100%" maw={520} p="lg" withBorder shadow="sm" radius="md" component="form" onSubmit={onSubmit}>
         <Stack>
           <Title order={3}>Create account</Title>
           {error && <Text c="red">{error}</Text>}
