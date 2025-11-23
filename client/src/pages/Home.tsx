@@ -1,6 +1,6 @@
 import { Button, Group, Stack, Text, Title } from '@mantine/core'
 import { useAuthStore } from '@/stores/auth'
-import { useLogout } from '@/hooks/auth/mutations'
+import { useLogout } from '@/features/auth/api/mutations'
 import { useNavigate } from 'react-router-dom'
 
 export default function Home() {

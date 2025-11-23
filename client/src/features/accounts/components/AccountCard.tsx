@@ -1,7 +1,7 @@
 import { Card, Text, Stack, Group, useMantineTheme } from "@mantine/core";
 import { useNavigate } from "react-router-dom";
 import React from "react";
-import { AccountListItem } from "@/features/accounts/api";
+import { AccountListItem } from "@/features/accounts/api/queries";
 import { IconWallet } from "@tabler/icons-react";
 
 interface AccountCardProps {

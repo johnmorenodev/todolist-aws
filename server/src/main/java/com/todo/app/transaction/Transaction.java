@@ -3,16 +3,12 @@ package com.todo.app.transaction;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-import org.hibernate.annotations.Filter;
-import org.hibernate.annotations.FilterDef;
-import org.hibernate.annotations.ParamDef;
 import org.hibernate.annotations.SQLDelete;
 
 import com.todo.app.account.Account;
 import com.todo.app.baseSoftDeleteEntity.BaseSoftDeleteEntity;
 import com.todo.app.category.Category;
 import com.todo.app.transactionType.TransactionType;
-import com.todo.app.user.User;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -31,7 +27,7 @@ import lombok.Setter;
 @Table(name = "transaction")
 @Setter
 @Getter
-@SQLDelete(sql = "UPDATE category SET deleted_at = NOW() WHERE id = ?")
+@SQLDelete(sql = "UPDATE transaction SET deleted_at = NOW() WHERE id = ?")
 public class Transaction extends BaseSoftDeleteEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

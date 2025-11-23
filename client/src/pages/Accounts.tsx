@@ -1,5 +1,5 @@
 import AccountCard from "@/features/accounts/components/AccountCard";
-import { useAccountList } from "@/hooks/accounts/queries";
+import { useAccountList } from "@/features/accounts/api/queries";
 import { Button, Title, Text, Stack, useMantineTheme } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import AddAccountForm from "@/features/accounts/components/AddAccountForm";

@@ -1,5 +1,8 @@
+import { useQuery, useInfiniteQuery } from '@tanstack/react-query'
 import { api } from "@/lib/api";
+import { transactionQueryKeys } from './queryKeys'
 
+// Types
 export type Transaction = {
   id: number;
   amount: number;
@@ -24,6 +27,7 @@ export type TransactionFilter = {
   transactionType?: string;
 };
 
+// API Functions
 export async function getRecentTransactions(accountId: number, limit: number = 10) {
   const { data } = await api.get<Transaction[]>(`/transaction/account/${accountId}/recent?limit=${limit}`);
   return data;
@@ -51,5 +55,36 @@ export async function getTransactionsList(
 
 export async function createTransaction(payload: CreateTransactionRequest) {
   await api.post<void>("/transaction", payload);
+}
+
+// React Query Hooks
+export function useRecentTransactions(accountId: number, limit: number = 10) {
+  return useQuery({
+    queryKey: transactionQueryKeys.recent(accountId),
+    queryFn: async () => {
+      return await getRecentTransactions(accountId, limit)
+    },
+    enabled: !!accountId,
+  })
+}
+
+export function useAccountTransactionsInfinite(
+  accountId: number,
+  filter?: TransactionFilter
+) {
+  return useInfiniteQuery({
+    queryKey: [...transactionQueryKeys.list(accountId), filter],
+    queryFn: async ({ pageParam }) => {
+      return await getTransactionsList(accountId, pageParam, 20, filter)
+    },
+    getNextPageParam: (lastPage, allPages) => {
+      if (lastPage.length < 20) {
+        return undefined
+      }
+      return allPages.length
+    },
+    initialPageParam: 0,
+    enabled: !!accountId,
+  })
 }
 

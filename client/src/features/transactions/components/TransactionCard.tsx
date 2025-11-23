@@ -1,5 +1,5 @@
 import { Card, Text, Group, useMantineTheme } from "@mantine/core";
-import { Transaction } from "../api";
+import { Transaction } from "../api/queries";
 import { formatDate } from "@/utils/date";
 import { IconArrowDownRight, IconArrowUpRight } from "@tabler/icons-react";
 

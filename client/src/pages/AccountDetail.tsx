@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useAccountSummary } from "@/hooks/accounts/queries";
+import { useAccountSummary } from "@/features/accounts/api/queries";
 import { Text, ActionIcon, Title, Stack, Group } from "@mantine/core";
 import AccountDetails from "@/features/accounts/components/AccountDetails";
 import RecentTransactions from "@/features/transactions/components/RecentTransactions";

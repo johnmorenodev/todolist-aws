@@ -1,8 +1,8 @@
 import { PropsWithChildren, useEffect, useMemo, useState } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 import { useAuthStore } from '@/stores/auth'
-import { useAuthMe } from '@/hooks/auth/queries'
-import { useRefresh } from '@/hooks/auth/mutations'
+import { useAuthMe } from '@/features/auth/api/queries'
+import { useRefresh } from '@/features/auth/api/mutations'
 
 export function RequireAuth({ children }: PropsWithChildren) {
   const location = useLocation()

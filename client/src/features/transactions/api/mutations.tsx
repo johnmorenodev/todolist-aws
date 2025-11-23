@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/lib/query-client";
 import { transactionQueryKeys } from "./queryKeys";
-import { createTransaction, CreateTransactionRequest } from "./index";
+import { createTransaction, CreateTransactionRequest } from "./queries";
 import { accountQueryKeys } from "@/features/accounts/api/queryKeys";
 
 export function useCreateTransaction() {

@@ -1,6 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { CreateAccountRequest } from "../components/AddAccountForm";
-import { createAccount } from ".";
+import { createAccount } from "./queries";
 import { queryClient } from "@/lib/query-client";
 import { accountQueryKeys } from "./queryKeys";
 

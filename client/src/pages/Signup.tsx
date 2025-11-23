@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Button, Group, Paper, PasswordInput, Stack, Text, TextInput, Title, useMantineTheme } from '@mantine/core'
 import { Link, useNavigate } from 'react-router-dom'
-import { useSignup } from '@/hooks/auth/mutations'
+import { useSignup } from '@/features/auth/api/mutations'
 import { IconMail, IconUser, IconLock, IconUserCircle } from '@tabler/icons-react'
 
 export default function Signup() {

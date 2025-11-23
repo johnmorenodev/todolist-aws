@@ -14,3 +14,5 @@ export function useAuthMe() {
   })
 }
 
+export type { MeData }
+
