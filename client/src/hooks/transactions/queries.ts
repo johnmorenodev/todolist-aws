@@ -1,6 +1,6 @@
 import { useQuery, useInfiniteQuery } from '@tanstack/react-query'
-import { getRecentTransactions, getTransactionsList, TransactionFilter } from '@/features/accounts/api/transactions'
-import { transactionQueryKeys } from '@/features/accounts/api/queryKeys'
+import { getRecentTransactions, getTransactionsList, TransactionFilter } from '@/features/transactions/api'
+import { transactionQueryKeys } from '@/features/transactions/api/queryKeys'
 
 export function useRecentTransactions(accountId: number, limit: number = 10) {
   return useQuery({

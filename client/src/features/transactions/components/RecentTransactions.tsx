@@ -1,6 +1,6 @@
 import { Text, Stack, Group, Anchor, useMantineTheme } from "@mantine/core";
 import { useNavigate } from "react-router-dom";
-import { useRecentTransactions } from "@/hooks/accounts/transactionQueries";
+import { useRecentTransactions } from "@/hooks/transactions/queries";
 import TransactionCard from "./TransactionCard";
 import { IconClock } from "@tabler/icons-react";
 

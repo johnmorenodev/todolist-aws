@@ -1,8 +1,8 @@
 import { Button, Card, Group, Modal, Text, Title, Stack, useMantineTheme } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import AddTransaction, { CreateTransactionFormData } from "./AddTransaction";
+import AddTransaction, { CreateTransactionFormData } from "@/features/transactions/components/AddTransaction";
 import { AccountSummary } from "@/features/accounts/api";
-import { useCreateTransaction } from "../api/mutations";
+import { useCreateTransaction } from "@/features/transactions/api/mutations";
 import { IconPlus, IconTrendingUp, IconTrendingDown } from "@tabler/icons-react";
 
 interface AccountDetailsProps {
