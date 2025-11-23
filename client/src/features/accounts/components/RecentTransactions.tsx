@@ -1,13 +1,15 @@
-import { Text, Stack, Group, Anchor } from "@mantine/core";
+import { Text, Stack, Group, Anchor, useMantineTheme } from "@mantine/core";
 import { useNavigate } from "react-router-dom";
 import { useRecentTransactions } from "@/hooks/accounts/transactionQueries";
 import TransactionCard from "./TransactionCard";
+import { IconClock } from "@tabler/icons-react";
 
 interface RecentTransactionsProps {
   accountId: number;
 }
 
 function RecentTransactions({ accountId }: RecentTransactionsProps) {
+  const theme = useMantineTheme();
   const navigate = useNavigate();
   const { data: transactions, isLoading, isError } = useRecentTransactions(accountId, 10);
 
@@ -16,13 +18,27 @@ function RecentTransactions({ accountId }: RecentTransactionsProps) {
   return (
     <Stack gap={4} className="mb-4">
       <Group justify="space-between" align="center">
-        <Text size="lg" fw={500}>
-          Recent Transactions
-        </Text>
+        <Group gap="xs">
+          <IconClock size={20} color={theme.colors.gray[6]} />
+          <Text size="lg" fw={600}>
+            Recent Transactions
+          </Text>
+        </Group>
         <Anchor
           size="sm"
           onClick={() => navigate(`/accounts/${accountId}/transactions`)}
-          style={{ cursor: "pointer" }}
+          c="blue"
+          fw={600}
+          style={{ 
+            cursor: "pointer",
+            transition: 'all 0.2s ease',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.textDecoration = 'underline';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.textDecoration = 'none';
+          }}
         >
           See more
         </Anchor>

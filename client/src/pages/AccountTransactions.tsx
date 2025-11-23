@@ -1,10 +1,10 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useAccountSummary } from "@/hooks/accounts/queries";
 import { useAccountTransactionsInfinite } from "@/hooks/accounts/transactionQueries";
-import { Text, ActionIcon, Stack, Group, TextInput, Select } from "@mantine/core";
+import { Text, ActionIcon, Stack, Group, TextInput, Select, Title } from "@mantine/core";
 import { DateInput } from "@mantine/dates";
 import { useEffect, useRef, useState } from "react";
-import { IconX } from "@tabler/icons-react";
+import { IconX, IconArrowLeft, IconSearch } from "@tabler/icons-react";
 import TransactionCard from "@/features/accounts/components/TransactionCard";
 import { TransactionFilter } from "@/features/accounts/api/transactions";
 
@@ -134,19 +134,38 @@ function AccountTransactions() {
   }
 
   return (
-    <>
-      <ActionIcon variant="subtle" onClick={() => navigate(`/accounts/${accountId}`)} className="mb-2" size="lg">
-        ←
-      </ActionIcon>
-      <Text size="xl" fw={600} className="mb-4">
-        {accountSummary.name} - All Transactions
-      </Text>
+    <Stack gap="lg">
+      <Group gap="sm" align="center" wrap="nowrap">
+        <ActionIcon 
+          variant="subtle" 
+          onClick={() => navigate(`/accounts/${accountId}`)} 
+          size="lg"
+          style={{
+            transition: 'all 0.2s ease',
+            flexShrink: 0,
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translateX(-2px)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateX(0)';
+          }}
+        >
+          <IconArrowLeft size={20} />
+        </ActionIcon>
+        <Title order={1} fw={700} style={{ flex: 1, minWidth: 0 }}>
+          {accountSummary.name} - All Transactions
+        </Title>
+      </Group>
       <TextInput
         placeholder="Search by description..."
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
         size="md"
-        className="mb-4"
+        leftSection={<IconSearch size={18} />}
+        style={{
+          background: 'white',
+        }}
       />
       <Stack gap="sm" className="mb-4">
         <Group gap="md" align="flex-end">
@@ -169,7 +188,7 @@ function AccountTransactions() {
               }
             }}
             size="md"
-            style={{ flex: 1 }}
+            style={{ flex: 1, background: 'white' }}
           />
           <Select
             label="Transaction Type"
@@ -182,15 +201,23 @@ function AccountTransactions() {
             value={transactionTypeFilter}
             onChange={(value) => setTransactionTypeFilter(value || "all")}
             size="md"
-            style={{ flex: 1 }}
+            style={{ flex: 1, background: 'white' }}
           />
           {hasFilters && (
             <ActionIcon
               variant="subtle"
-              color="gray"
               onClick={handleClearFilters}
               size="lg"
               title="Clear filters"
+              style={{
+                transition: 'all 0.2s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'rotate(90deg)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'rotate(0deg)';
+              }}
             >
               <IconX size={18} />
             </ActionIcon>
@@ -204,6 +231,7 @@ function AccountTransactions() {
               value={customStartDate}
               onChange={setCustomStartDate}
               size="md"
+              style={{ background: 'white' }}
             />
             <DateInput
               label="End Date"
@@ -211,6 +239,7 @@ function AccountTransactions() {
               value={customEndDate}
               onChange={setCustomEndDate}
               size="md"
+              style={{ background: 'white' }}
             />
           </Group>
         )}
@@ -236,7 +265,7 @@ function AccountTransactions() {
           </div>
         </Stack>
       )}
-    </>
+    </Stack>
   );
 }
 

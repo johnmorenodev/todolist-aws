@@ -1,4 +1,4 @@
-import { NumberInput, Radio, Group, Button, Stack, Card, TextInput } from "@mantine/core";
+import { NumberInput, Radio, Group, Button, Stack, Card, TextInput, useMantineTheme } from "@mantine/core";
 import { DateInput } from "@mantine/dates";
 import { useForm } from "@mantine/form";
 import { zod4Resolver } from "mantine-form-zod-resolver";
@@ -24,6 +24,7 @@ interface Props {
 }
 
 function AddTransaction({ accountId, onSuccess }: Props) {
+  const theme = useMantineTheme();
   const form = useForm<CreateTransactionFormData>({
     initialValues: {
       amount: 0,
@@ -37,6 +38,14 @@ function AddTransaction({ accountId, onSuccess }: Props) {
   function handleSubmit(values: CreateTransactionFormData) {
     onSuccess(values);
   }
+
+  const isIncomeSelected = form.values.transactionType === "income";
+  const isExpenseSelected = form.values.transactionType === "expense";
+  const incomeColor = theme.colors.green[5];
+  const expenseColor = theme.colors.red[5];
+  const incomeBg = theme.colors.green[0];
+  const expenseBg = theme.colors.red[0];
+  const defaultBorder = theme.colors.gray[3];
 
   return (
     <form onSubmit={form.onSubmit(handleSubmit)}>
@@ -63,8 +72,8 @@ function AddTransaction({ accountId, onSuccess }: Props) {
               radius="md"
               p="xs"
               style={{
-                borderColor: form.values.transactionType === "income" ? "#51cf66" : "#e0e0e0",
-                backgroundColor: form.values.transactionType === "income" ? "#f0f9f4" : "transparent",
+                borderColor: isIncomeSelected ? incomeColor : defaultBorder,
+                backgroundColor: isIncomeSelected ? incomeBg : "transparent",
                 cursor: "pointer",
               }}
               onClick={() => form.setFieldValue("transactionType", "income")}
@@ -75,8 +84,8 @@ function AddTransaction({ accountId, onSuccess }: Props) {
                 color="green"
                 styles={{
                   label: {
-                    color: form.values.transactionType === "income" ? "#51cf66" : undefined,
-                    fontWeight: form.values.transactionType === "income" ? 600 : undefined,
+                    color: isIncomeSelected ? incomeColor : undefined,
+                    fontWeight: isIncomeSelected ? 600 : undefined,
                   },
                 }}
               />
@@ -86,8 +95,8 @@ function AddTransaction({ accountId, onSuccess }: Props) {
               radius="md"
               p="xs"
               style={{
-                borderColor: form.values.transactionType === "expense" ? "#ff6b6b" : "#e0e0e0",
-                backgroundColor: form.values.transactionType === "expense" ? "#fff5f5" : "transparent",
+                borderColor: isExpenseSelected ? expenseColor : defaultBorder,
+                backgroundColor: isExpenseSelected ? expenseBg : "transparent",
                 cursor: "pointer",
               }}
               onClick={() => form.setFieldValue("transactionType", "expense")}
@@ -98,8 +107,8 @@ function AddTransaction({ accountId, onSuccess }: Props) {
                 color="red"
                 styles={{
                   label: {
-                    color: form.values.transactionType === "expense" ? "#ff6b6b" : undefined,
-                    fontWeight: form.values.transactionType === "expense" ? 600 : undefined,
+                    color: isExpenseSelected ? expenseColor : undefined,
+                    fontWeight: isExpenseSelected ? 600 : undefined,
                   },
                 }}
               />

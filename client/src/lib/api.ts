@@ -53,6 +53,34 @@ api.interceptors.request.use(async (config) => {
 
 let isRefreshing = false
 let pendingRequests: Array<() => void> = []
+let refreshTimer: NodeJS.Timeout | null = null
+
+// Proactive token refresh - refresh tokens every 10 minutes (before 15-minute expiration)
+function setupProactiveRefresh() {
+  if (typeof window === 'undefined') return
+  
+  // Clear existing timer if any
+  if (refreshTimer) {
+    clearInterval(refreshTimer)
+  }
+  
+  // Refresh tokens every 10 minutes (600000 ms)
+  refreshTimer = setInterval(async () => {
+    if (!isRefreshing) {
+      try {
+        await authRefresh()
+      } catch (error) {
+        // Silently fail - if refresh fails, the next request will handle it
+        console.debug('Proactive token refresh failed:', error)
+      }
+    }
+  }, 10 * 60 * 1000) // 10 minutes
+}
+
+// Setup proactive refresh when module loads
+if (typeof window !== 'undefined') {
+  setupProactiveRefresh()
+}
 
 api.interceptors.response.use(
   (res: AxiosResponse<ApiResponse<any>>) => {

@@ -1,4 +1,4 @@
-import { TextInput, Button, Modal } from '@mantine/core';
+import { TextInput, Button, Modal, Stack, useMantineTheme } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import React, { useState } from 'react'
 import { z } from 'zod';
@@ -20,6 +20,7 @@ const createAccountSchema = z.object({
 export type CreateAccountRequest  = z.infer<typeof createAccountSchema>;
 
 function AddAccountForm({ opened, open, close }: Props) {
+  const theme = useMantineTheme();
   const createAccountMutation = useCreateAccount();
   const form = useForm<CreateAccountRequest>({
     initialValues: {
@@ -36,7 +37,11 @@ function AddAccountForm({ opened, open, close }: Props) {
     }
 
     //submit form
-    createAccountMutation.mutate(values);
+    createAccountMutation.mutate(values, {
+      onSuccess: () => {
+        handleClose();
+      },
+    });
   }
 
   function handleClose() {
@@ -45,10 +50,33 @@ function AddAccountForm({ opened, open, close }: Props) {
   }
 
   return (
-    <Modal opened={opened} onClose={handleClose} title="Add Account">
+    <Modal 
+      opened={opened} 
+      onClose={handleClose} 
+      title="Add Account"
+      radius="md"
+    >
       <form onSubmit={form.onSubmit(onSubmit)}>
-        <TextInput label="Account Name" {...form.getInputProps('name')} />
-        <Button type="submit">Create</Button>
+        <Stack gap="md">
+          <TextInput 
+            label="Account Name" 
+            placeholder="Enter account name"
+            {...form.getInputProps('name')} 
+            size="md"
+          />
+          <Button 
+            type="submit" 
+            loading={createAccountMutation.isPending}
+            fullWidth
+            size="md"
+            style={{
+              background: `linear-gradient(135deg, ${theme.colors.blue[5]} 0%, ${theme.colors.blue[6]} 100%)`,
+              transition: 'all 0.2s ease',
+            }}
+          >
+            Create Account
+          </Button>
+        </Stack>
       </form>
     </Modal>
   )
