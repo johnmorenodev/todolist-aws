@@ -11,7 +11,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
-import org.springframework.security.web.csrf.CsrfTokenRepository;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
@@ -26,9 +25,15 @@ public class SecurityConfig {
         @Value("${app.cors.allowed-origin}")
         private String allowedOrigin;
 
+        private final CookieProperties cookieProperties;
+
         @Bean
         public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-                CsrfTokenRepository csrfRepo = CookieCsrfTokenRepository.withHttpOnlyFalse();
+                CookieCsrfTokenRepository csrfRepo = CookieCsrfTokenRepository.withHttpOnlyFalse();
+                csrfRepo.setCookieCustomizer(cookie -> {
+                        cookie.secure(cookieProperties.isSecure());
+                        cookie.sameSite(cookieProperties.getSameSite());
+                });
                 RequestMatcher logoutMatcher = request -> HttpMethod.POST.matches(request.getMethod())
                                 && request.getRequestURI().equals(Endpoints.LOGOUT);
                 RequestMatcher loginMatcher = request -> HttpMethod.POST.matches(request.getMethod())
@@ -83,9 +88,10 @@ public class SecurityConfig {
         private final JwtCookieAuthFilter jwtCookieAuthFilter;
         private final CsrfCookieFilter csrfCookieFilter;
 
-        public SecurityConfig(JwtCookieAuthFilter jwtCookieAuthFilter, CsrfCookieFilter csrfCookieFilter) {
+        public SecurityConfig(JwtCookieAuthFilter jwtCookieAuthFilter, CsrfCookieFilter csrfCookieFilter, CookieProperties cookieProperties) {
                 this.jwtCookieAuthFilter = jwtCookieAuthFilter;
                 this.csrfCookieFilter = csrfCookieFilter;
+                this.cookieProperties = cookieProperties;
         }
 
         // Extracted filters are defined as standalone @Component beans

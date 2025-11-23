@@ -1,11 +1,14 @@
+# Production profile
+# Activated by: SPRING_PROFILES_ACTIVE=prod
+# All sensitive values (DB, JWT secret) should come from environment variables
+
 spring:
-  application:
-    name: todolist
   datasource:
-    url: jdbc:postgresql://YOUR_PROD_DB_HOST:5432/todolist
+    # Override with SPRING_DATASOURCE_URL, SPRING_DATASOURCE_USERNAME, SPRING_DATASOURCE_PASSWORD
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://YOUR_PROD_DB_HOST:5432/todolist}
     driver-class-name: org.postgresql.Driver
-    username: YOUR_PROD_DB_USER
-    password: YOUR_PROD_DB_PASSWORD
+    username: ${SPRING_DATASOURCE_USERNAME:YOUR_PROD_DB_USER}
+    password: ${SPRING_DATASOURCE_PASSWORD:YOUR_PROD_DB_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: validate
@@ -17,12 +20,16 @@ spring:
     password: ${spring.datasource.password}
 
 jwt:
-  secret: YOUR_LONG_RANDOM_JWT_SECRET
+  # Override with JWT_SECRET
+  secret: ${JWT_SECRET:YOUR_LONG_RANDOM_JWT_SECRET}
 
 app:
   cors:
-    allowed-origin: https://your-site.example
+    # Override with APP_CORS_ALLOWED_ORIGIN
+    allowed-origin: ${APP_CORS_ALLOWED_ORIGIN:https://your-site.example}
   cookies:
-    secure: true
+    # Override with APP_COOKIES_SECURE and APP_COOKIES_SAME_SITE
+    secure: ${APP_COOKIES_SECURE:true}
+    same-site: ${APP_COOKIES_SAME_SITE:None}
 
 
