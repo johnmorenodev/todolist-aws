@@ -14,7 +14,6 @@ target/
 # Local config files (containing credentials)
 **/flyway.conf
 **/application-local.yml
-**/application-prod.yml
 
 # Logs
 *.log

@@ -3,10 +3,13 @@ import { Button, Group, Paper, PasswordInput, Stack, Text, TextInput, Title, use
 import { Link, useNavigate } from 'react-router-dom'
 import { useSignup } from '@/features/auth/mutations'
 import { IconMail, IconUser, IconLock, IconUserCircle } from '@tabler/icons-react'
+import { useQueryClient } from '@tanstack/react-query'
+import { authQueryKeys } from '@/features/auth/queryKeys'
 
 export default function Signup() {
   const theme = useMantineTheme()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const signupMutation = useSignup()
   const [email, setEmail] = useState('')
   const [username, setUsername] = useState('')
@@ -20,7 +23,8 @@ export default function Signup() {
       { email, username, password, firstName, lastName },
       {
         onSuccess: () => {
-          navigate('/login', { replace: true })
+          queryClient.invalidateQueries({ queryKey: authQueryKeys.me() })
+          navigate('/', { replace: true })
         },
       }
     )
