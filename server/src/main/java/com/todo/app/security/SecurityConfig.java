@@ -33,6 +33,9 @@ public class SecurityConfig {
                 csrfRepo.setCookieCustomizer(cookie -> {
                         cookie.secure(cookieProperties.isSecure());
                         cookie.sameSite(cookieProperties.getSameSite());
+                        if (cookieProperties.getDomain() != null && !cookieProperties.getDomain().isBlank()) {
+                                cookie.domain(cookieProperties.getDomain());
+                        }
                 });
                 RequestMatcher logoutMatcher = request -> HttpMethod.POST.matches(request.getMethod())
                                 && request.getRequestURI().equals(Endpoints.LOGOUT);
