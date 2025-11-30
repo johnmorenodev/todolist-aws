@@ -1,5 +1,6 @@
 package com.todo.app.transaction;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -91,14 +92,20 @@ public class TransactionRepositoryImpl implements TransactionRepositoryCustom {
             List<jakarta.persistence.criteria.Order> orders = new ArrayList<>();
             sort.forEach(order -> {
                 if (order.getProperty().equals("date")) {
-                    jakarta.persistence.criteria.Expression<LocalDateTime> dateExpr = cb.coalesce(
-                        root.get("transactionDate").as(LocalDateTime.class),
-                        root.get("createdAt").as(LocalDateTime.class)
+                    jakarta.persistence.criteria.Expression<LocalDate> transactionDateOnly = cb.function(
+                        "DATE",
+                        LocalDate.class,
+                        cb.coalesce(
+                            root.get("transactionDate").as(LocalDateTime.class),
+                            root.get("createdAt").as(LocalDateTime.class)
+                        )
                     );
                     if (order.isAscending()) {
-                        orders.add(cb.asc(dateExpr));
+                        orders.add(cb.asc(transactionDateOnly));
+                        orders.add(cb.asc(root.get("createdAt")));
                     } else {
-                        orders.add(cb.desc(dateExpr));
+                        orders.add(cb.desc(transactionDateOnly));
+                        orders.add(cb.desc(root.get("createdAt")));
                     }
                 } else {
                     if (order.isAscending()) {
@@ -110,11 +117,18 @@ public class TransactionRepositoryImpl implements TransactionRepositoryCustom {
             });
             query.orderBy(orders);
         } else {
-            jakarta.persistence.criteria.Expression<LocalDateTime> dateExpr = cb.coalesce(
-                root.get("transactionDate").as(LocalDateTime.class),
-                root.get("createdAt").as(LocalDateTime.class)
+            jakarta.persistence.criteria.Expression<LocalDate> transactionDateOnly = cb.function(
+                "DATE",
+                LocalDate.class,
+                cb.coalesce(
+                    root.get("transactionDate").as(LocalDateTime.class),
+                    root.get("createdAt").as(LocalDateTime.class)
+                )
             );
-            query.orderBy(cb.desc(dateExpr));
+            query.orderBy(
+                cb.desc(transactionDateOnly),
+                cb.desc(root.get("createdAt"))
+            );
         }
 
         TypedQuery<Transaction> typedQuery = entityManager.createQuery(query);

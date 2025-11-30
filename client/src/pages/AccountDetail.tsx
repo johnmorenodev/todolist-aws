@@ -4,12 +4,14 @@ import { Text, ActionIcon, Title, Stack, Group } from "@mantine/core";
 import AccountDetails from "@/features/accounts/components/AccountDetails";
 import RecentTransactions from "@/features/transactions/components/RecentTransactions";
 import { IconArrowLeft } from "@tabler/icons-react";
+import { useState } from "react";
 
 function AccountDetail() {
   const { accountId } = useParams<{ accountId: string }>();
   const navigate = useNavigate();
   const accountIdNum = accountId ? Number(accountId) : 0;
   const { data: accountSummary, isLoading: isLoadingSummary, isError: isErrorSummary } = useAccountSummary(accountIdNum);
+  const [selectedFilter, setSelectedFilter] = useState<"income" | "expense" | null>(null);
 
   if (isLoadingSummary) {
     return <div>Loading account...</div>;
@@ -64,8 +66,12 @@ function AccountDetail() {
           {accountSummary.name}
         </Title>
       </Group>
-      <AccountDetails account={accountSummary} />
-      <RecentTransactions accountId={accountIdNum} />
+      <AccountDetails 
+        account={accountSummary} 
+        selectedFilter={selectedFilter}
+        onFilterChange={setSelectedFilter}
+      />
+      <RecentTransactions accountId={accountIdNum} transactionTypeFilter={selectedFilter} />
     </Stack>
   );
 }

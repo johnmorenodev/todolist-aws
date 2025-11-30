@@ -10,6 +10,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 import com.todo.app.account.Account;
 import com.todo.app.transaction.model.TransactionFilter;
 import com.todo.app.transaction.model.TransactionResponse;
@@ -35,11 +37,11 @@ public class TransactionService {
         transactionRepository.save(newTransaction);
     }
 
-    public List<TransactionResponse> getRecentTransactions(Account account, int limit) {
-        TransactionFilter emptyFilter = new TransactionFilter(null, null, null, null);
+    public List<TransactionResponse> getRecentTransactions(Account account, int limit, String transactionType) {
+        TransactionFilter filter = new TransactionFilter(null, null, null, transactionType);
         Pageable pageable = PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, "date"));
         
-        List<Transaction> transactions = transactionRepository.findByAccountWithFilters(account, emptyFilter, pageable);
+        List<Transaction> transactions = transactionRepository.findByAccountWithFilters(account, filter, pageable);
         
         return transactions.stream().map(this::toTransactionResponse).collect(Collectors.toList());
     }
@@ -55,6 +57,38 @@ public class TransactionService {
         List<Transaction> transactions = transactionRepository.findByAccountWithFilters(account, filter, pageable);
         
         return transactions.stream().map(this::toTransactionResponse).collect(Collectors.toList());
+    }
+
+    public void updateTransaction(Long id, TransactionType transactionType, BigDecimal amount, String description, LocalDateTime transactionDate) {
+        Optional<Transaction> optTransaction = transactionRepository.findById(id);
+        if (optTransaction.isEmpty()) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.NOT_FOUND, 
+                "Transaction not found"
+            );
+        }
+        
+        Transaction transaction = optTransaction.get();
+        transaction.setTransactionType(transactionType);
+        transaction.setAmount(amount);
+        transaction.setDescription(description);
+        if (transactionDate != null) {
+            transaction.setTransactionDate(transactionDate);
+        }
+        
+        transactionRepository.save(transaction);
+    }
+
+    public void deleteTransaction(Long id) {
+        Optional<Transaction> optTransaction = transactionRepository.findById(id);
+        if (optTransaction.isEmpty()) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.NOT_FOUND, 
+                "Transaction not found"
+            );
+        }
+        
+        transactionRepository.delete(optTransaction.get());
     }
 
     private TransactionResponse toTransactionResponse(Transaction transaction) {

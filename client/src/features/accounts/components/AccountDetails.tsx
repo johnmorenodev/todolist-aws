@@ -7,9 +7,11 @@ import { IconPlus, IconTrendingUp, IconTrendingDown } from "@tabler/icons-react"
 
 interface AccountDetailsProps {
   account: AccountSummary;
+  selectedFilter: "income" | "expense" | null;
+  onFilterChange: (filter: "income" | "expense" | null) => void;
 }
 
-function AccountDetails({ account }: AccountDetailsProps) {
+function AccountDetails({ account, selectedFilter, onFilterChange }: AccountDetailsProps) {
   const theme = useMantineTheme();
   const [transactionModalOpened, { open: openTransactionModal, close: closeTransactionModal }] = useDisclosure(false);
   const createTransactionMutation = useCreateTransaction();
@@ -35,6 +37,7 @@ function AccountDetails({ account }: AccountDetailsProps) {
   }
 
   function handleClose() {
+    if (createTransactionMutation.isPending) return;
     closeTransactionModal();
   }
 
@@ -46,6 +49,27 @@ function AccountDetails({ account }: AccountDetailsProps) {
   const expenseColor = theme.colors.red[5];
   const incomeBg = theme.colors.green[0];
   const expenseBg = theme.colors.red[0];
+  const incomeBgSelected = theme.colors.green[1];
+  const expenseBgSelected = theme.colors.red[1];
+  
+  const isIncomeSelected = selectedFilter === "income";
+  const isExpenseSelected = selectedFilter === "expense";
+  
+  function handleIncomeClick() {
+    if (isIncomeSelected) {
+      onFilterChange(null);
+    } else {
+      onFilterChange("income");
+    }
+  }
+  
+  function handleExpenseClick() {
+    if (isExpenseSelected) {
+      onFilterChange(null);
+    } else {
+      onFilterChange("expense");
+    }
+  }
 
   return (
     <>
@@ -81,19 +105,28 @@ function AccountDetails({ account }: AccountDetailsProps) {
             withBorder 
             radius="md" 
             p="sm" 
-            shadow="xs"
+            shadow={isIncomeSelected ? "md" : "xs"}
             style={{ 
               borderColor: incomeColor, 
-              backgroundColor: incomeBg,
-              transition: 'all 0.2s ease',
+              backgroundColor: isIncomeSelected ? incomeBgSelected : incomeBg,
+              borderWidth: isIncomeSelected ? 2 : 1,
+              cursor: "pointer",
+              transition: 'all 0.1s ease',
+              transform: isIncomeSelected ? 'translateY(-2px)' : 'translateY(0)',
+              boxShadow: isIncomeSelected ? theme.shadows.md : undefined,
             }}
+            onClick={handleIncomeClick}
             onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-2px)';
-              e.currentTarget.style.boxShadow = theme.shadows.md;
+              if (!isIncomeSelected) {
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = theme.shadows.md;
+              }
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '';
+              if (!isIncomeSelected) {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '';
+              }
             }}
           >
             <Stack gap={4}>
@@ -108,19 +141,28 @@ function AccountDetails({ account }: AccountDetailsProps) {
             withBorder 
             radius="md" 
             p="sm" 
-            shadow="xs"
+            shadow={isExpenseSelected ? "md" : "xs"}
             style={{ 
               borderColor: expenseColor, 
-              backgroundColor: expenseBg,
-              transition: 'all 0.2s ease',
+              backgroundColor: isExpenseSelected ? expenseBgSelected : expenseBg,
+              borderWidth: isExpenseSelected ? 2 : 1,
+              cursor: "pointer",
+              transition: 'all 0.1s ease',
+              transform: isExpenseSelected ? 'translateY(-2px)' : 'translateY(0)',
+              boxShadow: isExpenseSelected ? theme.shadows.md : undefined,
             }}
+            onClick={handleExpenseClick}
             onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-2px)';
-              e.currentTarget.style.boxShadow = theme.shadows.md;
+              if (!isExpenseSelected) {
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = theme.shadows.md;
+              }
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '';
+              if (!isExpenseSelected) {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '';
+              }
             }}
           >
             <Stack gap={4}>
@@ -139,11 +181,15 @@ function AccountDetails({ account }: AccountDetailsProps) {
         title="Add Transaction"
         size="md"
         radius="md"
+        closeOnClickOutside={!createTransactionMutation.isPending}
+        closeOnEscape={!createTransactionMutation.isPending}
+        withCloseButton={!createTransactionMutation.isPending}
       >
         <AddTransaction 
           key={transactionModalOpened ? "open" : "closed"}
           accountId={account.accountId} 
-          onSuccess={handleSaveTransaction} 
+          onSuccess={handleSaveTransaction}
+          isLoading={createTransactionMutation.isPending}
         />
       </Modal>
     </>

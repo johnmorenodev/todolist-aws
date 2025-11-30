@@ -3,7 +3,8 @@ import { DateInput } from "@mantine/dates";
 import { useForm } from "@mantine/form";
 import { zod4Resolver } from "mantine-form-zod-resolver";
 import { z } from "zod";
-import React from "react";
+import React, { useEffect, useRef } from "react";
+import { Transaction } from "../api/queries";
 
 const createTransactionSchema = z.object({
   amount: z.number().positive("Amount must be greater than 0"),
@@ -21,22 +22,61 @@ export type CreateTransactionFormData = z.infer<typeof createTransactionSchema>;
 interface Props {
   accountId: number;
   onSuccess: (values: CreateTransactionFormData) => void;
+  initialData?: Transaction | null;
+  isLoading?: boolean;
 }
 
-function AddTransaction({ accountId, onSuccess }: Props) {
+function AddTransaction({ accountId, onSuccess, initialData, isLoading = false }: Props) {
   const theme = useMantineTheme();
+  const isEditMode = !!initialData;
+  const amountInputRef = useRef<HTMLInputElement>(null);
+  
   const form = useForm<CreateTransactionFormData>({
     initialValues: {
-      amount: 0,
-      transactionType: "income" as "income" | "expense",
-      description: "",
-      transactionDate: new Date(),
+      amount: initialData?.amount || 0,
+      transactionType: (initialData?.transactionType as "income" | "expense") || "income",
+      description: initialData?.description || "",
+      transactionDate: initialData?.transactionDate 
+        ? new Date(initialData.transactionDate) 
+        : initialData?.createdAt 
+        ? new Date(initialData.createdAt)
+        : new Date(),
     },
     validate: zod4Resolver(createTransactionSchema),
   });
 
+  useEffect(() => {
+    if (initialData) {
+      form.setValues({
+        amount: initialData.amount,
+        transactionType: initialData.transactionType as "income" | "expense",
+        description: initialData.description || "",
+        transactionDate: initialData.transactionDate 
+          ? new Date(initialData.transactionDate) 
+          : initialData.createdAt 
+          ? new Date(initialData.createdAt)
+          : new Date(),
+      });
+    }
+  }, [initialData]);
+
   function handleSubmit(values: CreateTransactionFormData) {
     onSuccess(values);
+  }
+
+  const amountInputProps = form.getInputProps("amount");
+  const originalOnFocus = amountInputProps.onFocus;
+
+  function handleAmountFocus(event: React.FocusEvent<HTMLInputElement>) {
+    if (originalOnFocus) {
+      originalOnFocus(event);
+    }
+    setTimeout(() => {
+      const input = amountInputRef.current || event.target as HTMLInputElement;
+      if (input && input.select) {
+        input.select();
+      }
+    }, 0);
   }
 
   const isIncomeSelected = form.values.transactionType === "income";
@@ -53,11 +93,19 @@ function AddTransaction({ accountId, onSuccess }: Props) {
         <NumberInput
           label="Amount"
           placeholder="Enter amount"
-          {...form.getInputProps("amount")}
+          {...amountInputProps}
           min={0}
           decimalScale={2}
           thousandSeparator=","
           size="md"
+          disabled={isLoading}
+          onFocus={handleAmountFocus}
+          getInputRef={(input) => {
+            amountInputRef.current = input;
+            if (typeof amountInputProps.getInputRef === 'function') {
+              amountInputProps.getInputRef(input);
+            }
+          }}
         />
         <Radio.Group
           {...form.getInputProps("transactionType")}
@@ -65,6 +113,7 @@ function AddTransaction({ accountId, onSuccess }: Props) {
           label="Transaction Type"
           size="md"
           error={form.errors.transactionType}
+          disabled={isLoading}
         >
           <Group mt="xs" gap="sm">
             <Card
@@ -76,7 +125,7 @@ function AddTransaction({ accountId, onSuccess }: Props) {
                 backgroundColor: isIncomeSelected ? incomeBg : "transparent",
                 cursor: "pointer",
               }}
-              onClick={() => form.setFieldValue("transactionType", "income")}
+              onClick={() => !isLoading && form.setFieldValue("transactionType", "income")}
             >
               <Radio
                 value="income"
@@ -99,7 +148,7 @@ function AddTransaction({ accountId, onSuccess }: Props) {
                 backgroundColor: isExpenseSelected ? expenseBg : "transparent",
                 cursor: "pointer",
               }}
-              onClick={() => form.setFieldValue("transactionType", "expense")}
+              onClick={() => !isLoading && form.setFieldValue("transactionType", "expense")}
             >
               <Radio
                 value="expense"
@@ -120,6 +169,7 @@ function AddTransaction({ accountId, onSuccess }: Props) {
           placeholder="Optional description"
           {...form.getInputProps("description")}
           size="md"
+          disabled={isLoading}
         />
         <DateInput
           label="Transaction Date"
@@ -127,10 +177,11 @@ function AddTransaction({ accountId, onSuccess }: Props) {
           valueFormat="DD MMM YYYY"
           {...form.getInputProps("transactionDate")}
           size="md"
+          disabled={isLoading}
         />
         <Group justify="flex-end" mt="md">
-          <Button type="submit" size="md">
-            Save
+          <Button type="submit" size="md" loading={isLoading} disabled={isLoading}>
+            {isEditMode ? "Update" : "Save"}
           </Button>
         </Group>
       </Stack>

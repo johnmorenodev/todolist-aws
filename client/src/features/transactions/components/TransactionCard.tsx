@@ -1,18 +1,21 @@
-import { Card, Text, Group, useMantineTheme } from "@mantine/core";
+import { Card, Text, Group, useMantineTheme, Menu, ActionIcon } from "@mantine/core";
 import { Transaction } from "../api/queries";
 import { formatDate } from "@/utils/date";
-import { IconArrowDownRight, IconArrowUpRight } from "@tabler/icons-react";
+import { IconArrowDownRight, IconArrowUpRight, IconDots, IconEdit, IconTrash } from "@tabler/icons-react";
 
 interface TransactionCardProps {
   transaction: Transaction;
+  onEdit?: (transaction: Transaction) => void;
+  onDelete?: (transaction: Transaction) => void;
 }
 
-function TransactionCard({ transaction }: TransactionCardProps) {
+function TransactionCard({ transaction, onEdit, onDelete }: TransactionCardProps) {
   const theme = useMantineTheme();
   const isIncome = transaction.transactionType === "income";
   const borderColor = isIncome ? theme.colors.green[5] : theme.colors.red[5];
   const backgroundColor = isIncome ? theme.colors.green[0] : theme.colors.red[0];
   const textColor = isIncome ? theme.colors.green[5] : theme.colors.red[5];
+  const hasActions = onEdit || onDelete;
 
   return (
     <Card
@@ -50,14 +53,49 @@ function TransactionCard({ transaction }: TransactionCardProps) {
             </Text>
           </div>
         </Group>
-        <Text
-          fw={700}
-          size="md"
-          c={textColor}
-        >
-          {isIncome ? "+" : "-"}
-          {transaction.amount.toLocaleString()}
-        </Text>
+        <Group gap="xs" align="center">
+          <Text
+            fw={700}
+            size="md"
+            c={textColor}
+          >
+            {isIncome ? "+" : "-"}
+            {transaction.amount.toLocaleString()}
+          </Text>
+          {hasActions && (
+            <Menu shadow="md" width={200} position="bottom-end">
+              <Menu.Target>
+                <ActionIcon
+                  variant="subtle"
+                  color="gray"
+                  size="sm"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <IconDots size={16} />
+                </ActionIcon>
+              </Menu.Target>
+              <Menu.Dropdown>
+                {onEdit && (
+                  <Menu.Item
+                    leftSection={<IconEdit size={14} />}
+                    onClick={() => onEdit(transaction)}
+                  >
+                    Edit
+                  </Menu.Item>
+                )}
+                {onDelete && (
+                  <Menu.Item
+                    leftSection={<IconTrash size={14} />}
+                    color="red"
+                    onClick={() => onDelete(transaction)}
+                  >
+                    Delete
+                  </Menu.Item>
+                )}
+              </Menu.Dropdown>
+            </Menu>
+          )}
+        </Group>
       </Group>
     </Card>
   );

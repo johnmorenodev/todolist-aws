@@ -20,6 +20,13 @@ export type CreateTransactionRequest = {
   transactionDate?: string;
 };
 
+export type UpdateTransactionRequest = {
+  amount: number;
+  transactionType: string;
+  description?: string;
+  transactionDate?: string;
+};
+
 export type TransactionFilter = {
   search?: string;
   startDate?: string;
@@ -28,8 +35,13 @@ export type TransactionFilter = {
 };
 
 // API Functions
-export async function getRecentTransactions(accountId: number, limit: number = 10) {
-  const { data } = await api.get<Transaction[]>(`/transaction/account/${accountId}/recent?limit=${limit}`);
+export async function getRecentTransactions(accountId: number, limit: number = 10, transactionType?: string | null) {
+  const params = new URLSearchParams();
+  params.append("limit", limit.toString());
+  if (transactionType) {
+    params.append("transactionType", transactionType);
+  }
+  const { data } = await api.get<Transaction[]>(`/transaction/account/${accountId}/recent?${params.toString()}`);
   return data;
 }
 
@@ -54,11 +66,11 @@ export async function getTransactionsList(
 }
 
 // React Query Hooks
-export function useRecentTransactions(accountId: number, limit: number = 10) {
+export function useRecentTransactions(accountId: number, limit: number = 10, transactionType?: string | null) {
   return useQuery({
-    queryKey: transactionQueryKeys.recent(accountId),
+    queryKey: transactionQueryKeys.recent(accountId, transactionType),
     queryFn: async () => {
-      return await getRecentTransactions(accountId, limit)
+      return await getRecentTransactions(accountId, limit, transactionType)
     },
     enabled: !!accountId,
   })

@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 import com.todo.app.account.Account;
 import com.todo.app.baseSoftDeleteEntity.BaseSoftDeleteEntity;
@@ -28,6 +29,7 @@ import lombok.Setter;
 @Setter
 @Getter
 @SQLDelete(sql = "UPDATE transaction SET deleted_at = NOW() WHERE id = ?")
+@SQLRestriction("deleted_at IS NULL")
 public class Transaction extends BaseSoftDeleteEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

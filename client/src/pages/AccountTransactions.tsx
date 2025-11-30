@@ -1,11 +1,14 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useAccountSummary } from "@/features/accounts/api/queries";
 import { useAccountTransactionsInfinite } from "@/features/transactions/api/queries";
-import { Text, ActionIcon, Stack, Group, TextInput, Select, Title, Divider, useMantineTheme } from "@mantine/core";
+import { Text, ActionIcon, Stack, Group, TextInput, Select, Title, Divider, useMantineTheme, Modal, Button } from "@mantine/core";
 import { DateInput } from "@mantine/dates";
 import { useEffect, useRef, useState, useMemo } from "react";
+import { useDisclosure } from "@mantine/hooks";
 import { IconX, IconArrowLeft, IconSearch } from "@tabler/icons-react";
 import TransactionCard from "@/features/transactions/components/TransactionCard";
+import AddTransaction, { CreateTransactionFormData } from "@/features/transactions/components/AddTransaction";
+import { useUpdateTransaction, useDeleteTransaction } from "@/features/transactions/api/mutations";
 import { TransactionFilter, Transaction } from "@/features/transactions/api/queries";
 
 function AccountTransactions() {
@@ -21,6 +24,11 @@ function AccountTransactions() {
   const [transactionTypeFilter, setTransactionTypeFilter] = useState<string>("all");
   const [customStartDate, setCustomStartDate] = useState<Date | null>(null);
   const [customEndDate, setCustomEndDate] = useState<Date | null>(null);
+  const [editModalOpened, { open: openEditModal, close: closeEditModal }] = useDisclosure(false);
+  const [deleteModalOpened, { open: openDeleteModal, close: closeDeleteModal }] = useDisclosure(false);
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+  const updateTransactionMutation = useUpdateTransaction();
+  const deleteTransactionMutation = useDeleteTransaction();
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -171,6 +179,68 @@ function AccountTransactions() {
     setCustomStartDate(null);
     setCustomEndDate(null);
   };
+
+  function handleEdit(transaction: Transaction) {
+    setSelectedTransaction(transaction);
+    openEditModal();
+  }
+
+  function handleDelete(transaction: Transaction) {
+    setSelectedTransaction(transaction);
+    openDeleteModal();
+  }
+
+  function confirmDelete() {
+    if (!selectedTransaction) return;
+
+    deleteTransactionMutation.mutate(
+      { id: selectedTransaction.id, accountId: accountIdNum },
+      {
+        onSuccess: () => {
+          closeDeleteModal();
+          setSelectedTransaction(null);
+        },
+      }
+    );
+  }
+
+  function handleUpdateTransaction(values: CreateTransactionFormData) {
+    if (!selectedTransaction) return;
+
+    const transactionDate = new Date(values.transactionDate);
+    transactionDate.setHours(0, 0, 0, 0);
+
+    updateTransactionMutation.mutate(
+      {
+        id: selectedTransaction.id,
+        accountId: accountIdNum,
+        payload: {
+          amount: values.amount,
+          transactionType: values.transactionType,
+          description: values.description || undefined,
+          transactionDate: transactionDate.toISOString(),
+        },
+      },
+      {
+        onSuccess: () => {
+          closeEditModal();
+          setSelectedTransaction(null);
+        },
+      }
+    );
+  }
+
+  function handleCloseEditModal() {
+    if (updateTransactionMutation.isPending) return;
+    closeEditModal();
+    setSelectedTransaction(null);
+  }
+
+  function handleCloseDeleteModal() {
+    if (deleteTransactionMutation.isPending) return;
+    closeDeleteModal();
+    setSelectedTransaction(null);
+  }
 
   if (isLoadingAccount) {
     return <div>Loading account...</div>;
@@ -342,7 +412,12 @@ function AccountTransactions() {
                 </Group>
                 <Stack gap="sm">
                   {monthTransactions.map((transaction) => (
-                    <TransactionCard key={transaction.id} transaction={transaction} />
+                    <TransactionCard 
+                      key={transaction.id} 
+                      transaction={transaction}
+                      onEdit={handleEdit}
+                      onDelete={handleDelete}
+                    />
                   ))}
                 </Stack>
               </Stack>
@@ -356,6 +431,57 @@ function AccountTransactions() {
           </div>
         </Stack>
       )}
+      <Modal
+        opened={editModalOpened}
+        onClose={handleCloseEditModal}
+        title="Edit Transaction"
+        size="md"
+        radius="md"
+        closeOnClickOutside={!updateTransactionMutation.isPending}
+        closeOnEscape={!updateTransactionMutation.isPending}
+        withCloseButton={!updateTransactionMutation.isPending}
+      >
+        <AddTransaction
+          key={selectedTransaction?.id || "new"}
+          accountId={accountIdNum}
+          onSuccess={handleUpdateTransaction}
+          initialData={selectedTransaction || undefined}
+          isLoading={updateTransactionMutation.isPending}
+        />
+      </Modal>
+      <Modal
+        opened={deleteModalOpened}
+        onClose={handleCloseDeleteModal}
+        title="Delete Transaction"
+        size="md"
+        radius="md"
+        closeOnClickOutside={!deleteTransactionMutation.isPending}
+        closeOnEscape={!deleteTransactionMutation.isPending}
+        withCloseButton={!deleteTransactionMutation.isPending}
+      >
+        <Stack gap="md">
+          <Text size="sm">
+            Are you sure you want to delete this transaction? This action cannot be undone.
+          </Text>
+          <Group justify="flex-end" mt="md">
+            <Button 
+              variant="subtle" 
+              onClick={handleCloseDeleteModal}
+              disabled={deleteTransactionMutation.isPending}
+            >
+              Cancel
+            </Button>
+            <Button 
+              color="red" 
+              onClick={confirmDelete} 
+              loading={deleteTransactionMutation.isPending}
+              disabled={deleteTransactionMutation.isPending}
+            >
+              Delete
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
     </Stack>
   );
 }
