@@ -1,7 +1,6 @@
 import { Route, Routes, Navigate, useLocation } from "react-router-dom";
 import { RequireAuth } from "@/components/RequireAuth";
 import { Container } from "@/components/Container";
-import Home from "@/pages/Home";
 import Login from "@/pages/Login";
 import Signup from "@/pages/Signup";
 import Accounts from "./pages/Accounts";
@@ -15,11 +14,7 @@ export default function App() {
       <Routes>
         <Route
           path="/"
-          element={
-            <RequireAuth>
-              <Home />
-            </RequireAuth>
-          }
+          element={<Navigate to="/accounts" replace />}
         />
         <Route path="/login" element={<Login />} />
         <Route

@@ -29,7 +29,7 @@ interface Props {
 function AddTransaction({ accountId, onSuccess, initialData, isLoading = false }: Props) {
   const theme = useMantineTheme();
   const isEditMode = !!initialData;
-  const amountInputRef = useRef<HTMLInputElement>(null);
+  const amountInputRef = useRef<HTMLInputElement | null>(null);
   
   const form = useForm<CreateTransactionFormData>({
     initialValues: {
@@ -79,6 +79,10 @@ function AddTransaction({ accountId, onSuccess, initialData, isLoading = false }
     }, 0);
   }
 
+  function handleInputRef(node: HTMLInputElement | null) {
+    amountInputRef.current = node;
+  }
+
   const isIncomeSelected = form.values.transactionType === "income";
   const isExpenseSelected = form.values.transactionType === "expense";
   const incomeColor = theme.colors.green[5];
@@ -100,12 +104,7 @@ function AddTransaction({ accountId, onSuccess, initialData, isLoading = false }
           size="md"
           disabled={isLoading}
           onFocus={handleAmountFocus}
-          getInputRef={(input) => {
-            amountInputRef.current = input;
-            if (typeof amountInputProps.getInputRef === 'function') {
-              amountInputProps.getInputRef(input);
-            }
-          }}
+          ref={handleInputRef}
         />
         <Radio.Group
           {...form.getInputProps("transactionType")}
