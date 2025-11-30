@@ -16,33 +16,6 @@ describe('api helper', () => {
     vi.restoreAllMocks()
   })
 
-  it('preloads CSRF for mutating requests', async () => {
-    let seenUrls: string[] = []
-    let seenHeaders: any[] = []
-    api.defaults.adapter = async (config) => {
-      seenUrls.push(config.url || '')
-      seenHeaders.push(config.headers || {})
-      // simulate backend setting the XSRF cookie when /auth/csrf is called
-      if ((config.url || '').includes('/auth/csrf')) {
-        Object.defineProperty(document, 'cookie', {
-          value: 'XSRF-TOKEN=test-token',
-          writable: true,
-        })
-      }
-      return {
-        data: {},
-        status: 200,
-        statusText: 'OK',
-        headers: {},
-        config,
-      }
-    }
-    await api.post('/x', {})
-    expect(seenUrls[0]).toContain('/auth/csrf')
-    expect(seenUrls[1]).toContain('/x')
-    expect(seenHeaders[1]['X-XSRF-TOKEN']).toBe('test-token')
-  })
-
   it('queues on 401 and retries after refresh', async () => {
     // refreshSpy.mockResolvedValueOnce({ status: 200 } as any)
     let call = 0

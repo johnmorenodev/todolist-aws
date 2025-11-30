@@ -12,43 +12,6 @@ declare module 'axios' {
 export const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
   withCredentials: true,
-  xsrfCookieName: 'XSRF-TOKEN',
-  xsrfHeaderName: 'X-XSRF-TOKEN',
-})
-
-function getCookie(name: string): string | null {
-  if (typeof document === 'undefined') return null
-  const cookies = document.cookie ? document.cookie.split('; ') : []
-  for (const cookie of cookies) {
-    if (cookie.startsWith(name + '=')) {
-      return decodeURIComponent(cookie.substring(name.length + 1))
-    }
-  }
-  return null
-}
-
-async function ensureCsrf() {
-  if (typeof document !== 'undefined' && document.cookie.includes('XSRF-TOKEN=')) return
-  try {
-    await api.get('/auth/csrf')
-  } catch {
-    // no-op
-  }
-}
-
-api.interceptors.request.use(async (config) => {
-  const method = (config.method || 'get').toLowerCase()
-  if (['post', 'put', 'patch', 'delete'].includes(method)) {
-    await ensureCsrf()
-    if (typeof document !== 'undefined') {
-      const token = getCookie('XSRF-TOKEN')
-      if (token) {
-        config.headers = config.headers ?? {}
-        ;(config.headers as any)['X-XSRF-TOKEN'] = token
-      }
-    }
-  }
-  return config
 })
 
 let isRefreshing = false

@@ -111,12 +111,4 @@ public class AuthController {
                 .orElse(ResponseEntity.ok(ApiResponse.ok(new MeData(false, null))));
     }
 
-    @GetMapping("/csrf")
-    public ResponseEntity<?> csrf(HttpServletRequest request) {
-        String headerToken = request.getHeader("X-XSRF-TOKEN");
-        String cookieToken = CookieReader.get(request, "XSRF-TOKEN");
-        log.info("Auth CSRF endpoint hit - headerToken={} cookieToken={}",
-                headerToken, cookieToken);
-        return ResponseEntity.noContent().build();
-    }
 }
